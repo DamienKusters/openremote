@@ -199,6 +199,8 @@ public class RulesetDeployment {
                 return startRulesGroovy(ruleset, assetsFacade, usersFacade, notificationsFacade);
             case JSON:
                 return startRulesJson(ruleset);
+            case FLOW:
+                return startRulesFlow(ruleset, assetsFacade, usersFacade, notificationsFacade);
         }
         return false;
     }
@@ -433,6 +435,20 @@ public class RulesetDeployment {
         } catch (Exception e) {
             RulesEngine.LOG.log(Level.SEVERE, "Error evaluating ruleset: " + ruleset, e);
             setError(e);
+            return false;
+        }
+    }
+
+    protected boolean startRulesFlow(Ruleset ruleset, Assets assetsFacade, Users usersFacade, NotificationsFacade consolesFacade){
+        // de-serialise rule json stuff here, build the actual rule by traversing through every node from each output
+        // returning false for now because i still need to do the model stuff
+        try
+        {
+            FlowRulesBuilder rulesBuilder = new FlowRulesBuilder();
+            rulesBuilder.add();
+            rulesBuilder.build();
+            return true;
+        }catch (Exception e){
             return false;
         }
     }
