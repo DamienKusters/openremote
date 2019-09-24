@@ -19,6 +19,7 @@
  */
 package org.openremote.manager.rules;
 
+import com.google.gson.Gson;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -41,6 +42,7 @@ import org.openremote.model.rules.Assets;
 import org.openremote.model.rules.Ruleset;
 import org.openremote.model.rules.RulesetStatus;
 import org.openremote.model.rules.Users;
+import org.openremote.model.rules.flow.ServerReadyNodeCollection;
 import org.openremote.model.rules.json.JsonRulesetDefinition;
 
 import javax.script.*;
@@ -442,13 +444,21 @@ public class RulesetDeployment {
     protected boolean startRulesFlow(Ruleset ruleset, Assets assetsFacade, Users usersFacade, NotificationsFacade consolesFacade){
         // de-serialise rule json stuff here, build the actual rule by traversing through every node from each output
         // returning false for now because i still need to do the model stuff
+
         try
         {
+            ServerReadyNodeCollection nodeCollection = Container.JSON.readValue(ruleset.getRules(), ServerReadyNodeCollection.class);
+
             FlowRulesBuilder rulesBuilder = new FlowRulesBuilder();
-            rulesBuilder.add();
-            rulesBuilder.build();
+            rulesBuilder.add(nodeCollection);
+            for (Rule rule : rulesBuilder.build()) {
+                RulesEngine.LOG.info("Registering rule: " + rule.getName());
+                rules.register(rule);
+            }
             return true;
         }catch (Exception e){
+            RulesEngine.LOG.log(Level.SEVERE, "Error evaluating ruleset: " + ruleset, e);
+            setError(e);
             return false;
         }
     }

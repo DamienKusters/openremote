@@ -11,6 +11,12 @@ public class ServerReadyConnection
         this.to = to;
     }
 
+    public ServerReadyConnection()
+    {
+        from = null;
+        to = null;
+    }
+
     public ServerReadySocket getFrom()
     {
         return from;

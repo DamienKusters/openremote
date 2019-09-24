@@ -15,6 +15,14 @@ public class ServerReadyNodeCollection
         this.connections = connections;
     }
 
+    public ServerReadyNodeCollection()
+    {
+        name = "Unnamed node collection";
+        description = "No description provided";
+        nodes = new ServerReadyNode[]{};
+        connections = new ServerReadyConnection[]{};
+    }
+
     public String getName()
     {
         return name;

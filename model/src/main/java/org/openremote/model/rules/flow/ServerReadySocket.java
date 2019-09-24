@@ -6,6 +6,7 @@ public class ServerReadySocket
     private String name;
     private String type;
     private String nodeId;
+    private int index;
 
     public ServerReadySocket(String id, String name, String type, String nodeId, int index)
     {
@@ -16,7 +17,14 @@ public class ServerReadySocket
         this.index = index;
     }
 
-    private int index;
+    public ServerReadySocket()
+    {
+        id = "INVALID ID";
+        name = "Unnamed socket";
+        type = "INVALID TYPE";
+        nodeId = "INVALID NODE ID";
+        index = -1;
+    }
 
     public String getId()
     {

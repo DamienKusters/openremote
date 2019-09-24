@@ -13,6 +13,13 @@ public class ServerReadyInternal
         this.value = value;
     }
 
+    public ServerReadyInternal()
+    {
+        name = "Unnamed internal";
+        picker = new Picker();
+        value = "Empty internal";
+    }
+
     public String getName()
     {
         return name;

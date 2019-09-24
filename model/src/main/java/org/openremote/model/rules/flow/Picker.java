@@ -74,4 +74,11 @@ public class Picker
         this.type = type;
         this.options = options;
     }
+
+    public Picker()
+    {
+        name = "Unnamed picker";
+        type = PickerType.Number;
+        options = new Option[]{};
+    }
 }

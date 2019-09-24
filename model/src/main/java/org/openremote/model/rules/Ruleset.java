@@ -125,7 +125,7 @@ public abstract class Ruleset {
                     "  }\n" +
                     "]"
                 ),
-        FLOW(".json", "{name:\"\", description: \"\", nodes:[], connections:[]}");
+        FLOW(".json", "{\"name\":\"\", \"description\": \"\", \"nodes\":[], \"connections\":[]}");
 
         final String fileExtension;
         final String emptyRulesExample;

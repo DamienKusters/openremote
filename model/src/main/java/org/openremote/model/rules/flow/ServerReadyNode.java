@@ -21,6 +21,17 @@ public class ServerReadyNode
         this.outputs = outputs;
     }
 
+    public ServerReadyNode()
+    {
+        id = "INVALID ID";
+        type = "INVALID NODE TYPE";
+        name = "Unnamed node";
+        position = new Point();
+        internals = new ServerReadyInternal[]{};
+        inputs = new ServerReadySocket[]{};
+        outputs = new ServerReadySocket[]{};
+    }
+
     public String getId()
     {
         return id;
