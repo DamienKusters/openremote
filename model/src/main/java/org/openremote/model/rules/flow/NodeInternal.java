@@ -1,19 +1,19 @@
 package org.openremote.model.rules.flow;
 
-public class ServerReadyInternal
+public class NodeInternal
 {
     private String name;
     private Picker picker;
     private Object value;
 
-    public ServerReadyInternal(String name, Picker picker, Object value)
+    public NodeInternal(String name, Picker picker, Object value)
     {
         this.name = name;
         this.picker = picker;
         this.value = value;
     }
 
-    public ServerReadyInternal()
+    public NodeInternal()
     {
         name = "Unnamed internal";
         picker = new Picker();

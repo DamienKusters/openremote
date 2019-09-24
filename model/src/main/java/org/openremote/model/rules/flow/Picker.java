@@ -78,7 +78,7 @@ public class Picker
     public Picker()
     {
         name = "Unnamed picker";
-        type = PickerType.Number;
+        type = PickerType.NUMBER;
         options = new Option[]{};
     }
 }

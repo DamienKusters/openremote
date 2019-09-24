@@ -2,7 +2,7 @@ package org.openremote.manager.rules;
 
 import org.jeasy.rules.api.Rule;
 import org.jeasy.rules.core.RuleBuilder;
-import org.openremote.model.rules.flow.ServerReadyNodeCollection;
+import org.openremote.model.rules.flow.NodeCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +10,9 @@ import java.util.logging.Level;
 
 public class FlowRulesBuilder extends RulesBuilder
 {
-    private List<ServerReadyNodeCollection> nodeCollections = new ArrayList<>();
+    private List<NodeCollection> nodeCollections = new ArrayList<>();
 
-    public void add(ServerReadyNodeCollection nodeCollection)
+    public void add(NodeCollection nodeCollection)
     {
         nodeCollections.add(nodeCollection);
     }
@@ -20,7 +20,7 @@ public class FlowRulesBuilder extends RulesBuilder
     public Rule[] build()
     {
         List<Rule> rules = new ArrayList<>();
-        for (ServerReadyNodeCollection collection : nodeCollections)
+        for (NodeCollection collection : nodeCollections)
         {
             org.jeasy.rules.api.Condition condition = facts -> {
                 // traverse structure to find condition

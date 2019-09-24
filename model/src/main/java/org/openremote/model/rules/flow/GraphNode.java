@@ -1,16 +1,16 @@
 package org.openremote.model.rules.flow;
 
-public class ServerReadyNode
+public class GraphNode
 {
     private String id;
     private String type;
     private String name;
     private NodePosition position;
-    private ServerReadyInternal[] internals;
-    private ServerReadySocket[] inputs;
-    private ServerReadySocket[] outputs;
+    private NodeInternal[] internals;
+    private NodeSocket[] inputs;
+    private NodeSocket[] outputs;
 
-    public ServerReadyNode(String id, String type, String name, NodePosition position, ServerReadyInternal[] internals, ServerReadySocket[] inputs, ServerReadySocket[] outputs)
+    public GraphNode(String id, String type, String name, NodePosition position, NodeInternal[] internals, NodeSocket[] inputs, NodeSocket[] outputs)
     {
         this.id = id;
         this.type = type;
@@ -21,15 +21,15 @@ public class ServerReadyNode
         this.outputs = outputs;
     }
 
-    public ServerReadyNode()
+    public GraphNode()
     {
         id = "INVALID ID";
         type = "INVALID NODE TYPE";
         name = "Unnamed node";
         position = new NodePosition();
-        internals = new ServerReadyInternal[]{};
-        inputs = new ServerReadySocket[]{};
-        outputs = new ServerReadySocket[]{};
+        internals = new NodeInternal[]{};
+        inputs = new NodeSocket[]{};
+        outputs = new NodeSocket[]{};
     }
 
     public String getId()
@@ -72,32 +72,32 @@ public class ServerReadyNode
         this.position = position;
     }
 
-    public ServerReadyInternal[] getInternals()
+    public NodeInternal[] getInternals()
     {
         return internals;
     }
 
-    public void setInternals(ServerReadyInternal[] internals)
+    public void setInternals(NodeInternal[] internals)
     {
         this.internals = internals;
     }
 
-    public ServerReadySocket[] getInputs()
+    public NodeSocket[] getInputs()
     {
         return inputs;
     }
 
-    public void setInputs(ServerReadySocket[] inputs)
+    public void setInputs(NodeSocket[] inputs)
     {
         this.inputs = inputs;
     }
 
-    public ServerReadySocket[] getOutputs()
+    public NodeSocket[] getOutputs()
     {
         return outputs;
     }
 
-    public void setOutputs(ServerReadySocket[] outputs)
+    public void setOutputs(NodeSocket[] outputs)
     {
         this.outputs = outputs;
     }

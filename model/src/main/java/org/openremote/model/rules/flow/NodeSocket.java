@@ -1,6 +1,6 @@
 package org.openremote.model.rules.flow;
 
-public class ServerReadySocket
+public class NodeSocket
 {
     private String id;
     private String name;
@@ -8,7 +8,7 @@ public class ServerReadySocket
     private String nodeId;
     private int index;
 
-    public ServerReadySocket(String id, String name, String type, String nodeId, int index)
+    public NodeSocket(String id, String name, String type, String nodeId, int index)
     {
         this.id = id;
         this.name = name;
@@ -17,7 +17,7 @@ public class ServerReadySocket
         this.index = index;
     }
 
-    public ServerReadySocket()
+    public NodeSocket()
     {
         id = "INVALID ID";
         name = "Unnamed socket";

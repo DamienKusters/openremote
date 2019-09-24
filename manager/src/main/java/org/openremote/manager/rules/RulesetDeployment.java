@@ -19,7 +19,6 @@
  */
 package org.openremote.manager.rules;
 
-import com.google.gson.Gson;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -36,13 +35,12 @@ import org.openremote.container.Container;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.concurrent.ManagerExecutorService;
-import org.openremote.manager.rules.facade.AssetsFacade;
 import org.openremote.manager.rules.facade.NotificationsFacade;
 import org.openremote.model.rules.Assets;
 import org.openremote.model.rules.Ruleset;
 import org.openremote.model.rules.RulesetStatus;
 import org.openremote.model.rules.Users;
-import org.openremote.model.rules.flow.ServerReadyNodeCollection;
+import org.openremote.model.rules.flow.NodeCollection;
 import org.openremote.model.rules.json.JsonRulesetDefinition;
 
 import javax.script.*;
@@ -447,7 +445,7 @@ public class RulesetDeployment {
 
         try
         {
-            ServerReadyNodeCollection nodeCollection = Container.JSON.readValue(ruleset.getRules(), ServerReadyNodeCollection.class);
+            NodeCollection nodeCollection = Container.JSON.readValue(ruleset.getRules(), NodeCollection.class);
 
             FlowRulesBuilder rulesBuilder = new FlowRulesBuilder();
             rulesBuilder.add(nodeCollection);

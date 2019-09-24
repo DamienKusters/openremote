@@ -2,11 +2,12 @@ package org.openremote.model.rules.flow;
 
 public enum PickerType
 {
-    Text,
-    Multiline,
-    Number,
-    Dropdown,
-    DoubleDropdown,
-    AssetAttribute,
-    Color
+    TEXT,
+    MULTILINE,
+    NUMBER,
+    DROPDOWN,
+    DOUBLE_DROPDOWN,
+    ASSET_ATTRIBUTE,
+    COLOR
 }
+
