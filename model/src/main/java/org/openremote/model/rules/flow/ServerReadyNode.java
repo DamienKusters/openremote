@@ -5,12 +5,12 @@ public class ServerReadyNode
     private String id;
     private String type;
     private String name;
-    private Point position;
+    private NodePosition position;
     private ServerReadyInternal[] internals;
     private ServerReadySocket[] inputs;
     private ServerReadySocket[] outputs;
 
-    public ServerReadyNode(String id, String type, String name, Point position, ServerReadyInternal[] internals, ServerReadySocket[] inputs, ServerReadySocket[] outputs)
+    public ServerReadyNode(String id, String type, String name, NodePosition position, ServerReadyInternal[] internals, ServerReadySocket[] inputs, ServerReadySocket[] outputs)
     {
         this.id = id;
         this.type = type;
@@ -26,7 +26,7 @@ public class ServerReadyNode
         id = "INVALID ID";
         type = "INVALID NODE TYPE";
         name = "Unnamed node";
-        position = new Point();
+        position = new NodePosition();
         internals = new ServerReadyInternal[]{};
         inputs = new ServerReadySocket[]{};
         outputs = new ServerReadySocket[]{};
@@ -62,12 +62,12 @@ public class ServerReadyNode
         this.name = name;
     }
 
-    public Point getPosition()
+    public NodePosition getPosition()
     {
         return position;
     }
 
-    public void setPosition(Point position)
+    public void setPosition(NodePosition position)
     {
         this.position = position;
     }
