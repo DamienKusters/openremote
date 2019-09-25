@@ -2,16 +2,16 @@ package org.openremote.model.rules.flow.definition;
 
 import org.openremote.model.rules.flow.Node;
 
-public class NodeDefinition {
+public class NodePair {
     private Node definition;
     private NodeImplementation implementation;
 
-    public NodeDefinition(Node definition, NodeImplementation implementation) {
+    public NodePair(Node definition, NodeImplementation implementation) {
         this.definition = definition;
         this.implementation = implementation;
     }
 
-    public NodeDefinition() {
+    public NodePair() {
         this.definition = null;
         this.implementation = null;
     }

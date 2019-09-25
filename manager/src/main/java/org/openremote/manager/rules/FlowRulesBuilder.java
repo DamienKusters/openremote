@@ -19,12 +19,12 @@ public class FlowRulesBuilder extends RulesBuilder {
         List<Rule> rules = new ArrayList<>();
         for (NodeCollection collection : nodeCollections) {
             org.jeasy.rules.api.Condition condition = facts -> {
-                // traverse structure to find condition
+                //TODO traverse structure to find condition
                 return false;
             };
 
             org.jeasy.rules.api.Action action = facts -> {
-                // traverse structure to find action
+                //TODO traverse structure to find action
             };
 
             Rule rule = new RuleBuilder().

@@ -1,34 +1,33 @@
 package org.openremote.model.rules.flow;
 
 public class NodeSocket {
+    // Generation of ID is the responsibility of the npm package
     private String id;
     private String name;
-    private String type;
+    private NodeDataType type;
+    // Assignment of Node ID is the responsibility of the npm package
     private String nodeId;
+    // Assignment of index is the responsibility of the npm package
     private int index;
 
-    public NodeSocket(String id, String name, String type, String nodeId, int index) {
-        this.id = id;
+    public NodeSocket(String name, NodeDataType type) {
+        this.id = "INVALID ID";
         this.name = name;
         this.type = type;
-        this.nodeId = nodeId;
-        this.index = index;
+        this.nodeId = "INVALID NODE ID";
+        this.index = 0;
     }
 
     public NodeSocket() {
         id = "INVALID ID";
         name = "Unnamed socket";
-        type = "INVALID TYPE";
+        type = NodeDataType.ANY;
         nodeId = "INVALID NODE ID";
         index = -1;
     }
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -39,11 +38,11 @@ public class NodeSocket {
         this.name = name;
     }
 
-    public String getType() {
+    public NodeDataType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(NodeDataType type) {
         this.type = type;
     }
 

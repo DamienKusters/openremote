@@ -1,16 +1,19 @@
 package org.openremote.model.rules.flow;
 
 public class Node {
+    // Generation of ID is the responsibility of the npm package
     private String id;
-    private String type;
+    private NodeType type;
     private String name;
     private NodePosition position;
     private NodeInternal[] internals;
     private NodeSocket[] inputs;
     private NodeSocket[] outputs;
 
-    public Node(String id, String type, String name, NodePosition position, NodeInternal[] internals, NodeSocket[] inputs, NodeSocket[] outputs) {
-        this.id = id;
+    public Node(NodeType type, String name, NodeInternal[] internals, NodeSocket[] inputs, NodeSocket[] outputs) {
+        this.id = "INVALID ID";
+        this.position = new NodePosition(0, 0);
+
         this.type = type;
         this.name = name;
         this.position = position;
@@ -21,7 +24,7 @@ public class Node {
 
     public Node() {
         id = "INVALID ID";
-        type = "INVALID NODE TYPE";
+        type = NodeType.INPUT;
         name = "Unnamed node";
         position = new NodePosition();
         internals = new NodeInternal[]{};
@@ -33,15 +36,11 @@ public class Node {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getType() {
+    public NodeType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(NodeType type) {
         this.type = type;
     }
 
