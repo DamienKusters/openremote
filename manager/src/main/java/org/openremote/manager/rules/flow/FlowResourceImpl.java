@@ -18,7 +18,6 @@ public class FlowResourceImpl extends ManagerWebResource implements FlowResource
     public FlowResourceImpl(TimerService timerService, ManagerIdentityService identityService, NodeStorageService nodeStorageService) {
         super(timerService, identityService);
         this.nodeStorageService = nodeStorageService;
-        LOG.warning("Flow resource succesfully initialised!");
         for (Node node : nodeStorageService.getNodes()) {
             LOG.info("Node found: " + node.getName());
         }
@@ -31,7 +30,7 @@ public class FlowResourceImpl extends ManagerWebResource implements FlowResource
 
     @Override
     public Node[] getAllNodeDefinitionsByType(RequestParams requestParams, NodeType type) {
-        return nodeStorageService.getNodes().stream().filter((n) -> n.getType().equals(type.name())).toArray(Node[]::new);
+        return nodeStorageService.getNodes().stream().filter((n) -> n.getType().equals(type)).toArray(Node[]::new);
     }
 
     @Override

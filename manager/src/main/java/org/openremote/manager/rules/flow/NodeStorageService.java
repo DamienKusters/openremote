@@ -13,12 +13,9 @@ import org.openremote.model.value.Values;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class NodeStorageService implements ContainerService {
-
-
     //TODO: Not sure what to do here yet, so for now it just stores a hardcoded list of node definitions and implementations
 
     private final List<NodePair> nodePairs = new ArrayList<>();
