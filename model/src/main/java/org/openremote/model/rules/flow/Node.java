@@ -16,7 +16,7 @@ public class Node {
 
         this.type = type;
         this.name = name;
-        this.position = position;
+        this.position = new NodePosition(0, 0);
         this.internals = internals;
         this.inputs = inputs;
         this.outputs = outputs;
