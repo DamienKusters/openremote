@@ -8,20 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-public class FlowRulesBuilder extends RulesBuilder
-{
+public class FlowRulesBuilder extends RulesBuilder {
     private List<NodeCollection> nodeCollections = new ArrayList<>();
 
-    public void add(NodeCollection nodeCollection)
-    {
+    public void add(NodeCollection nodeCollection) {
         nodeCollections.add(nodeCollection);
     }
 
-    public Rule[] build()
-    {
+    public Rule[] build() {
         List<Rule> rules = new ArrayList<>();
-        for (NodeCollection collection : nodeCollections)
-        {
+        for (NodeCollection collection : nodeCollections) {
             org.jeasy.rules.api.Condition condition = facts -> {
                 // traverse structure to find condition
                 return false;

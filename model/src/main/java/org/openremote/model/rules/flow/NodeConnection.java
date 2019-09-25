@@ -1,39 +1,32 @@
 package org.openremote.model.rules.flow;
 
-public class NodeConnection
-{
+public class NodeConnection {
     private NodeSocket from;
     private NodeSocket to;
 
-    public NodeConnection(NodeSocket from, NodeSocket to)
-    {
+    public NodeConnection(NodeSocket from, NodeSocket to) {
         this.from = from;
         this.to = to;
     }
 
-    public NodeConnection()
-    {
+    public NodeConnection() {
         from = null;
         to = null;
     }
 
-    public NodeSocket getFrom()
-    {
+    public NodeSocket getFrom() {
         return from;
     }
 
-    public void setFrom(NodeSocket from)
-    {
+    public void setFrom(NodeSocket from) {
         this.from = from;
     }
 
-    public NodeSocket getTo()
-    {
+    public NodeSocket getTo() {
         return to;
     }
 
-    public void setTo(NodeSocket to)
-    {
+    public void setTo(NodeSocket to) {
         this.to = to;
     }
 }

@@ -59,45 +59,9 @@ import static org.openremote.manager.rules.JsonRulesBuilder.executeRuleActions;
 
 public class RulesetDeployment {
 
-    /**
-     * An interface that looks like a JavaScript browser console, for simplified logging.
-     */
-    public static class JsConsole {
-
-        final protected Logger logger;
-
-        public JsConsole(Logger logger) {
-            this.logger = logger;
-        }
-
-        public void debug(Object o) {
-            logger.fine(o != null ? o.toString() : "null");
-        }
-
-        public void log(Object o) {
-            logger.info(o != null ? o.toString() : "null");
-        }
-
-        public void warn(Object o) {
-            logger.warning(o != null ? o.toString() : "null");
-        }
-
-        public void error(Object o) {
-            logger.severe(o != null ? o.toString() : "null");
-        }
-    }
-
-    // TODO Finish groovy sandbox
-    static class GroovyDenyAllFilter extends GroovyValueFilter {
-        @Override
-        public Object filterReceiver(Object receiver) {
-            throw new SecurityException("Not allowed: " + receiver);
-        }
-    }
     public static final int DEFAULT_RULE_PRIORITY = 1000;
     // Share one JS script engine manager, it's thread-safe
     static final protected ScriptEngineManager scriptEngineManager;
-
     static final protected GroovyShell groovyShell;
 
     static {
@@ -136,7 +100,6 @@ public class RulesetDeployment {
     protected Throwable error;
     protected JsonRulesBuilder jsonRulesBuilder;
     protected JsonRulesetDefinition jsonRulesetDefinition;
-
     public RulesetDeployment(Ruleset ruleset, TimerService timerService, AssetStorageService assetStorageService, ManagerExecutorService executorService, Assets assetsFacade, Users usersFacade, NotificationsFacade notificationsFacade) {
         this.ruleset = ruleset;
         this.timerService = timerService;
@@ -186,7 +149,7 @@ public class RulesetDeployment {
     public void onStart(RulesFacts facts) {
         if (jsonRulesetDefinition != null && jsonRulesetDefinition.rules != null && jsonRulesetDefinition.rules.length > 0) {
             Arrays.stream(jsonRulesetDefinition.rules).forEach(jsonRule ->
-                executeRuleActions(jsonRule, jsonRule.onStart, "onStart", false, facts, null, assetsFacade, usersFacade, notificationsFacade, timerService, assetStorageService, this::scheduleRuleAction));
+                    executeRuleActions(jsonRule, jsonRule.onStart, "onStart", false, facts, null, assetsFacade, usersFacade, notificationsFacade, timerService, assetStorageService, this::scheduleRuleAction));
         }
     }
 
@@ -439,12 +402,11 @@ public class RulesetDeployment {
         }
     }
 
-    protected boolean startRulesFlow(Ruleset ruleset, Assets assetsFacade, Users usersFacade, NotificationsFacade consolesFacade){
+    protected boolean startRulesFlow(Ruleset ruleset, Assets assetsFacade, Users usersFacade, NotificationsFacade consolesFacade) {
         // de-serialise rule json stuff here, build the actual rule by traversing through every node from each output
         // returning false for now because i still need to do the model stuff
 
-        try
-        {
+        try {
             NodeCollection nodeCollection = Container.JSON.readValue(ruleset.getRules(), NodeCollection.class);
 
             FlowRulesBuilder rulesBuilder = new FlowRulesBuilder();
@@ -454,7 +416,7 @@ public class RulesetDeployment {
                 rules.register(rule);
             }
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             RulesEngine.LOG.log(Level.SEVERE, "Error evaluating ruleset: " + ruleset, e);
             setError(e);
             return false;
@@ -489,5 +451,41 @@ public class RulesetDeployment {
                 ", version=" + getVersion() +
                 ", status=" + status +
                 '}';
+    }
+
+    /**
+     * An interface that looks like a JavaScript browser console, for simplified logging.
+     */
+    public static class JsConsole {
+
+        final protected Logger logger;
+
+        public JsConsole(Logger logger) {
+            this.logger = logger;
+        }
+
+        public void debug(Object o) {
+            logger.fine(o != null ? o.toString() : "null");
+        }
+
+        public void log(Object o) {
+            logger.info(o != null ? o.toString() : "null");
+        }
+
+        public void warn(Object o) {
+            logger.warning(o != null ? o.toString() : "null");
+        }
+
+        public void error(Object o) {
+            logger.severe(o != null ? o.toString() : "null");
+        }
+    }
+
+    // TODO Finish groovy sandbox
+    static class GroovyDenyAllFilter extends GroovyValueFilter {
+        @Override
+        public Object filterReceiver(Object receiver) {
+            throw new SecurityException("Not allowed: " + receiver);
+        }
     }
 }

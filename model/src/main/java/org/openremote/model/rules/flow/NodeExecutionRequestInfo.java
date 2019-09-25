@@ -1,19 +1,17 @@
 package org.openremote.model.rules.flow;
 
-public class NodeExecutionRequestInfo
-{
+public class NodeExecutionRequestInfo {
     private NodeCollection collection;
 
     private int outputSocketIndex;
     private NodeSocket outputSocket;
 
-    private GraphNode node;
+    private Node node;
     private NodeSocket[] inputs;
     private NodeSocket[] outputs;
     private NodeInternal[] internals;
 
-    public NodeExecutionRequestInfo()
-    {
+    public NodeExecutionRequestInfo() {
         collection = new NodeCollection();
         outputSocketIndex = -1;
         outputSocket = null;
@@ -23,8 +21,7 @@ public class NodeExecutionRequestInfo
         internals = new NodeInternal[]{};
     }
 
-    public NodeExecutionRequestInfo(NodeCollection collection, int outputSocketIndex, NodeSocket outputSocket, GraphNode node, NodeSocket[] inputs, NodeSocket[] outputs, NodeInternal[] internals)
-    {
+    public NodeExecutionRequestInfo(NodeCollection collection, int outputSocketIndex, NodeSocket outputSocket, Node node, NodeSocket[] inputs, NodeSocket[] outputs, NodeInternal[] internals) {
         this.collection = collection;
         this.outputSocketIndex = outputSocketIndex;
         this.outputSocket = outputSocket;
@@ -34,73 +31,59 @@ public class NodeExecutionRequestInfo
         this.internals = internals;
     }
 
-    public NodeCollection getCollection()
-    {
+    public NodeCollection getCollection() {
         return collection;
     }
 
-    public void setCollection(NodeCollection collection)
-    {
+    public void setCollection(NodeCollection collection) {
         this.collection = collection;
     }
 
-    public int getOutputSocketIndex()
-    {
+    public int getOutputSocketIndex() {
         return outputSocketIndex;
     }
 
-    public void setOutputSocketIndex(int outputSocketIndex)
-    {
+    public void setOutputSocketIndex(int outputSocketIndex) {
         this.outputSocketIndex = outputSocketIndex;
     }
 
-    public NodeSocket getOutputSocket()
-    {
+    public NodeSocket getOutputSocket() {
         return outputSocket;
     }
 
-    public void setOutputSocket(NodeSocket outputSocket)
-    {
+    public void setOutputSocket(NodeSocket outputSocket) {
         this.outputSocket = outputSocket;
     }
 
-    public GraphNode getNode()
-    {
+    public Node getNode() {
         return node;
     }
 
-    public void setNode(GraphNode node)
-    {
+    public void setNode(Node node) {
         this.node = node;
     }
 
-    public NodeSocket[] getInputs()
-    {
+    public NodeSocket[] getInputs() {
         return inputs;
     }
 
-    public void setInputs(NodeSocket[] inputs)
-    {
+    public void setInputs(NodeSocket[] inputs) {
         this.inputs = inputs;
     }
 
-    public NodeSocket[] getOutputs()
-    {
+    public NodeSocket[] getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(NodeSocket[] outputs)
-    {
+    public void setOutputs(NodeSocket[] outputs) {
         this.outputs = outputs;
     }
 
-    public NodeInternal[] getInternals()
-    {
+    public NodeInternal[] getInternals() {
         return internals;
     }
 
-    public void setInternals(NodeInternal[] internals)
-    {
+    public void setInternals(NodeInternal[] internals) {
         this.internals = internals;
     }
 }

@@ -1,7 +1,6 @@
 package org.openremote.model.rules.flow;
 
-public enum GraphNodeType
-{
+public enum NodeType {
     INPUT,
     PROCESSOR,
     OUTPUT,

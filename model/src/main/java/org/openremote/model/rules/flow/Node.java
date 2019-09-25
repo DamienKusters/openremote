@@ -1,7 +1,6 @@
 package org.openremote.model.rules.flow;
 
-public class GraphNode
-{
+public class Node {
     private String id;
     private String type;
     private String name;
@@ -10,8 +9,7 @@ public class GraphNode
     private NodeSocket[] inputs;
     private NodeSocket[] outputs;
 
-    public GraphNode(String id, String type, String name, NodePosition position, NodeInternal[] internals, NodeSocket[] inputs, NodeSocket[] outputs)
-    {
+    public Node(String id, String type, String name, NodePosition position, NodeInternal[] internals, NodeSocket[] inputs, NodeSocket[] outputs) {
         this.id = id;
         this.type = type;
         this.name = name;
@@ -21,8 +19,7 @@ public class GraphNode
         this.outputs = outputs;
     }
 
-    public GraphNode()
-    {
+    public Node() {
         id = "INVALID ID";
         type = "INVALID NODE TYPE";
         name = "Unnamed node";
@@ -32,73 +29,59 @@ public class GraphNode
         outputs = new NodeSocket[]{};
     }
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setId(String id)
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
-    public void setType(String type)
-    {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public NodePosition getPosition()
-    {
+    public NodePosition getPosition() {
         return position;
     }
 
-    public void setPosition(NodePosition position)
-    {
+    public void setPosition(NodePosition position) {
         this.position = position;
     }
 
-    public NodeInternal[] getInternals()
-    {
+    public NodeInternal[] getInternals() {
         return internals;
     }
 
-    public void setInternals(NodeInternal[] internals)
-    {
+    public void setInternals(NodeInternal[] internals) {
         this.internals = internals;
     }
 
-    public NodeSocket[] getInputs()
-    {
+    public NodeSocket[] getInputs() {
         return inputs;
     }
 
-    public void setInputs(NodeSocket[] inputs)
-    {
+    public void setInputs(NodeSocket[] inputs) {
         this.inputs = inputs;
     }
 
-    public NodeSocket[] getOutputs()
-    {
+    public NodeSocket[] getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(NodeSocket[] outputs)
-    {
+    public void setOutputs(NodeSocket[] outputs) {
         this.outputs = outputs;
     }
 }

@@ -1,6 +1,6 @@
 package org.openremote.model.rules.flow;
 
-public enum GraphDataType {
+public enum NodeDataType {
     NUMBER,
     STRING,
     BOOLEAN,
@@ -9,4 +9,3 @@ public enum GraphDataType {
     COLOR,
     ANY
 }
-

@@ -1,7 +1,6 @@
 package org.openremote.model.rules.flow;
 
-public enum PickerType
-{
+public enum PickerType {
     TEXT,
     MULTILINE,
     NUMBER,

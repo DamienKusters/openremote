@@ -1,65 +1,54 @@
 package org.openremote.model.rules.flow;
 
-public class NodeCollection
-{
+public class NodeCollection {
     private String name;
     private String description;
-    private GraphNode[] nodes;
+    private Node[] nodes;
     private NodeConnection[] connections;
 
-    public NodeCollection(String name, String description, GraphNode[] nodes, NodeConnection[] connections)
-    {
+    public NodeCollection(String name, String description, Node[] nodes, NodeConnection[] connections) {
         this.name = name;
         this.description = description;
         this.nodes = nodes;
         this.connections = connections;
     }
 
-    public NodeCollection()
-    {
+    public NodeCollection() {
         name = "Unnamed node collection";
         description = "No description provided";
-        nodes = new GraphNode[]{};
+        nodes = new Node[]{};
         connections = new NodeConnection[]{};
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description)
-    {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    public GraphNode[] getNodes()
-    {
+    public Node[] getNodes() {
         return nodes;
     }
 
-    public void setNodes(GraphNode[] nodes)
-    {
+    public void setNodes(Node[] nodes) {
         this.nodes = nodes;
     }
 
-    public NodeConnection[] getConnections()
-    {
+    public NodeConnection[] getConnections() {
         return connections;
     }
 
-    public void setConnections(NodeConnection[] connections)
-    {
+    public void setConnections(NodeConnection[] connections) {
         this.connections = connections;
     }
 }
