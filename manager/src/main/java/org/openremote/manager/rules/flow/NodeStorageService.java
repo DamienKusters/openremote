@@ -16,7 +16,7 @@ import org.openremote.model.value.Values;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class NodeStorageService implements ContainerService {
@@ -53,7 +53,7 @@ public class NodeStorageService implements ContainerService {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.BOOLEAN)
                 }),
-                info -> Optional.of((boolean) info.getInternals()[0].getValue())
+                info -> ((boolean) info.getInternals()[0].getValue())
         ));
 
         nodePairs.add(new NodePair(
@@ -83,13 +83,13 @@ public class NodeStorageService implements ContainerService {
                 info -> (info.getInternals()[0].getValue())
         ));
 
-        nodePairs.add(new NodePair(
+/*        nodePairs.add(new NodePair(
                 new Node(NodeType.OUTPUT, "Write attribute", new NodeInternal[]{
                         new NodeInternal("Attribute", new Picker("Asset Attribute", PickerType.ASSET_ATTRIBUTE))
                 }, new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.ANY)
                 }, new NodeSocket[0]),
-                info -> Optional.of((RulesBuilder.Action) facts -> {
+                info -> ((RulesBuilder.Action) facts -> {
                     AssetAttributeInternalValue assetAttributePair = (AssetAttributeInternalValue) info.getInternals()[0].getValue();
                     NodeSocket inputSocket = info.getInputs()[0];
                     Node inputNode = info.getCollection().getNodeById(inputSocket.getNodeId());
@@ -101,6 +101,32 @@ public class NodeStorageService implements ContainerService {
                         facts.updateAssetState(assetAttributePair.getAssetId(), assetAttributePair.getAttributeName(), Values.parseOrNull(Container.JSON.writeValueAsString(value)));
                     } catch (JsonProcessingException e) {
                         RulesEngine.LOG.severe("Flow rule error: node " + inputNode.getName() + " outputs invalid value");
+                    }
+                })
+        ));*/
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.OUTPUT, "Log", new NodeInternal[]{
+                        new NodeInternal("Level", new Picker("Log level", PickerType.DROPDOWN, new Option[]{
+                                new Option("Info", 0),
+                                new Option("Warning", 1),
+                                new Option("Severe", 2),
+                        }))
+                }, new NodeSocket[]{
+                        new NodeSocket("message", NodeDataType.ANY)
+                }, new NodeSocket[0]),
+                info -> ((RulesBuilder.Action) facts -> {
+
+                    NodeSocket inputSocket = info.getInputs()[0];
+                    Node inputNode = info.getCollection().getNodeById(inputSocket.getNodeId());
+                    Object value = getImplementationFor(inputNode.getName()).execute(
+                            new NodeExecutionRequestInfo(info.getCollection(), inputNode, inputSocket)
+                    );
+
+                    try {
+                        RulesEngine.LOG.log(Level.WARNING, "Flow rule " + info.getCollection().getName() + ": " + Container.JSON.writeValueAsString(value));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
                     }
                 })
         ));

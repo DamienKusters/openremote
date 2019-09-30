@@ -9,6 +9,9 @@ public class Option {
         this.value = value;
     }
 
+    public Option() {
+    }
+
     public String getName() {
         return name;
     }

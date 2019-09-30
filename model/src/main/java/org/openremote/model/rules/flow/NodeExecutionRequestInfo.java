@@ -37,11 +37,11 @@ public class NodeExecutionRequestInfo {
     }
 
     public NodeExecutionRequestInfo(NodeCollection collection, Node node, NodeSocket socket) {
-        if (socket != null && Arrays.stream(node.getOutputs()).anyMatch(c -> c.getNodeId().equals(node.getId())))
+        if (socket != null && Arrays.stream(node.getOutputs()).noneMatch(c -> c.getNodeId().equals(node.getId())))
             throw new IllegalArgumentException("Given socket does not belong to given node");
 
         this.collection = collection;
-        this.outputSocketIndex = java.util.Arrays.binarySearch(node.getOutputs(), socket);
+        this.outputSocketIndex = Arrays.asList(node.getOutputs()).indexOf(socket);
         this.outputSocket = socket;
         this.node = node;
 

@@ -33,7 +33,7 @@ public class FlowRulesBuilder extends RulesBuilder {
                     rules.add(createRule(collection.getName() + " - " + count, collection, node));
                     count++;
                 } catch (Exception e) {
-                    RulesEngine.RULES_LOG.severe("Flow rule error" + e.getMessage());
+                    RulesEngine.RULES_LOG.severe("Flow rule error: " + e.getMessage());
                 }
             }
         }
