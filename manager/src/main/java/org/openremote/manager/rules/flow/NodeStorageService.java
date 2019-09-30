@@ -8,11 +8,11 @@ import org.openremote.manager.web.ManagerWebService;
 import org.openremote.model.rules.flow.*;
 import org.openremote.model.rules.flow.definition.NodeImplementation;
 import org.openremote.model.rules.flow.definition.NodePair;
-import org.openremote.model.value.Values;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class NodeStorageService implements ContainerService {
@@ -39,11 +39,53 @@ public class NodeStorageService implements ContainerService {
     @Override
     public void start(Container container) throws Exception {
         //TODO: remove this
+
         nodePairs.add(new NodePair(
-                new Node(NodeType.INPUT, "Zero", new NodeInternal[0], new NodeSocket[0], new NodeSocket[]{
-                        new NodeSocket("just 0", NodeDataType.COLOR)
+                new Node(NodeType.INPUT, "Boolean", new NodeInternal[]{
+                        new NodeInternal("Value", new Picker("Boolean", PickerType.DROPDOWN, new Option[]{
+                                new Option("True", true),
+                                new Option("False", false)
+                        }))
+                }, new NodeSocket[0], new NodeSocket[]{
+                        new NodeSocket("value", NodeDataType.BOOLEAN)
                 }),
-                info -> Values.create(0)
+                info -> Optional.of((boolean) info.getInternals()[0].getValue())
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.INPUT, "Number", new NodeInternal[]{
+                        new NodeInternal("Value", new Picker("Number", PickerType.NUMBER))
+                }, new NodeSocket[0], new NodeSocket[]{
+                        new NodeSocket("value", NodeDataType.NUMBER)
+                }),
+                info -> Optional.of((float) info.getInternals()[0].getValue())
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.INPUT, "Text", new NodeInternal[]{
+                        new NodeInternal("Value", new Picker("Text", PickerType.MULTILINE))
+                }, new NodeSocket[0], new NodeSocket[]{
+                        new NodeSocket("value", NodeDataType.STRING)
+                }),
+                info -> Optional.of((String) info.getInternals()[0].getValue())
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.INPUT, "Read attribute", new NodeInternal[]{
+                        new NodeInternal("Attribute", new Picker("Asset Attribute", PickerType.ASSET_ATTRIBUTE))
+                }, new NodeSocket[0], new NodeSocket[]{
+                        new NodeSocket("value", NodeDataType.ANY)
+                }),
+                info -> Optional.of(info.getInternals()[0].getValue())
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.OUTPUT, "Write attribute", new NodeInternal[]{
+                        new NodeInternal("Attribute", new Picker("Asset Attribute", PickerType.ASSET_ATTRIBUTE))
+                }, new NodeSocket[]{
+                        new NodeSocket("value", NodeDataType.ANY)
+                }, new NodeSocket[0]),
+                info -> Optional.of(info.getInternals()[0].getValue())
         ));
     }
 

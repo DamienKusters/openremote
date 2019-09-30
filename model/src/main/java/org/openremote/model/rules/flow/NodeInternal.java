@@ -11,6 +11,12 @@ public class NodeInternal {
         this.value = value;
     }
 
+    public NodeInternal(String name, Picker picker) {
+        this.name = name;
+        this.picker = picker;
+        this.value = null;
+    }
+
     public NodeInternal() {
         name = "Unnamed internal";
         picker = new Picker();

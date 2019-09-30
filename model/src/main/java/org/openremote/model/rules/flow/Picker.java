@@ -11,6 +11,12 @@ public class Picker {
         this.options = options;
     }
 
+    public Picker(String name, PickerType type) {
+        this.name = name;
+        this.type = type;
+        this.options = new Option[0];
+    }
+
     public Picker() {
         name = "Unnamed picker";
         type = PickerType.NUMBER;
@@ -39,31 +45,5 @@ public class Picker {
 
     public void setOptions(Option[] options) {
         this.options = options;
-    }
-
-    public class Option {
-        private String name;
-        private Object value;
-
-        public Option(String name, Object value) {
-            this.name = name;
-            this.value = value;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public void setValue(Object value) {
-            this.value = value;
-        }
     }
 }
