@@ -36,6 +36,7 @@ import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.concurrent.ManagerExecutorService;
 import org.openremote.manager.rules.facade.NotificationsFacade;
+import org.openremote.manager.rules.flow.NodeStorageService;
 import org.openremote.model.rules.Assets;
 import org.openremote.model.rules.Ruleset;
 import org.openremote.model.rules.RulesetStatus;
@@ -92,6 +93,7 @@ public class RulesetDeployment {
     final protected AssetStorageService assetStorageService;
     final protected TimerService timerService;
     final protected ManagerExecutorService executorService;
+    final protected NodeStorageService nodeStorageService;
     final protected Assets assetsFacade;
     final protected Users usersFacade;
     final protected NotificationsFacade notificationsFacade;
@@ -100,11 +102,12 @@ public class RulesetDeployment {
     protected Throwable error;
     protected JsonRulesBuilder jsonRulesBuilder;
     protected JsonRulesetDefinition jsonRulesetDefinition;
-    public RulesetDeployment(Ruleset ruleset, TimerService timerService, AssetStorageService assetStorageService, ManagerExecutorService executorService, Assets assetsFacade, Users usersFacade, NotificationsFacade notificationsFacade) {
+    public RulesetDeployment(Ruleset ruleset, TimerService timerService, AssetStorageService assetStorageService, ManagerExecutorService executorService, NodeStorageService nodeStorageService, Assets assetsFacade, Users usersFacade, NotificationsFacade notificationsFacade) {
         this.ruleset = ruleset;
         this.timerService = timerService;
         this.assetStorageService = assetStorageService;
         this.executorService = executorService;
+        this.nodeStorageService = nodeStorageService;
         this.assetsFacade = assetsFacade;
         this.usersFacade = usersFacade;
         this.notificationsFacade = notificationsFacade;
@@ -410,6 +413,7 @@ public class RulesetDeployment {
             NodeCollection nodeCollection = Container.JSON.readValue(ruleset.getRules(), NodeCollection.class);
 
             FlowRulesBuilder rulesBuilder = new FlowRulesBuilder();
+            rulesBuilder.setNodeStorageService(nodeStorageService);
             rulesBuilder.add(nodeCollection);
             for (Rule rule : rulesBuilder.build()) {
                 RulesEngine.LOG.info("Registering rule: " + rule.getName());

@@ -33,6 +33,7 @@ import org.openremote.manager.asset.AssetUpdateProcessor;
 import org.openremote.manager.concurrent.ManagerExecutorService;
 import org.openremote.manager.event.ClientEventService;
 import org.openremote.manager.notification.NotificationService;
+import org.openremote.manager.rules.flow.NodeStorageService;
 import org.openremote.manager.rules.geofence.GeofenceAssetAdapter;
 import org.openremote.manager.security.ManagerIdentityService;
 import org.openremote.model.Constants;
@@ -108,6 +109,7 @@ public class RulesService extends RouteBuilder implements ContainerService, Asse
     protected NotificationService notificationService;
     protected AssetProcessingService assetProcessingService;
     protected ClientEventService clientEventService;
+    protected NodeStorageService nodeStorageService;
     protected RulesEngine<GlobalRuleset> globalEngine;
     protected Tenant[] tenants;
     protected AssetLocationPredicateProcessor locationPredicateRulesConsumer;
@@ -135,6 +137,7 @@ public class RulesService extends RouteBuilder implements ContainerService, Asse
         assetStorageService = container.getService(AssetStorageService.class);
         assetProcessingService = container.getService(AssetProcessingService.class);
         clientEventService = container.getService(ClientEventService.class);
+        nodeStorageService = container.getService(NodeStorageService.class);
 
         clientEventService.addSubscriptionAuthorizer((auth, subscription) -> {
 
@@ -516,6 +519,7 @@ public class RulesService extends RouteBuilder implements ContainerService, Asse
                     assetProcessingService,
                     notificationService,
                     clientEventService,
+                    nodeStorageService,
                     new RulesEngineId<>(),
                     locationPredicateRulesConsumer
                 );
@@ -554,6 +558,7 @@ public class RulesService extends RouteBuilder implements ContainerService, Asse
                         assetProcessingService,
                         notificationService,
                         clientEventService,
+                        nodeStorageService,
                         new RulesEngineId<>(realm),
                         locationPredicateRulesConsumer
                     );
@@ -622,6 +627,7 @@ public class RulesService extends RouteBuilder implements ContainerService, Asse
                         assetProcessingService,
                         notificationService,
                         clientEventService,
+                        nodeStorageService,
                         new RulesEngineId<>(ruleset.getRealm(), assetId),
                         locationPredicateRulesConsumer
                     );

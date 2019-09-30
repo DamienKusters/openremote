@@ -1,13 +1,17 @@
 package org.openremote.manager.rules.flow;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.openremote.container.Container;
 import org.openremote.container.ContainerService;
 import org.openremote.container.timer.TimerService;
+import org.openremote.manager.rules.RulesBuilder;
+import org.openremote.manager.rules.RulesEngine;
 import org.openremote.manager.security.ManagerIdentityService;
 import org.openremote.manager.web.ManagerWebService;
 import org.openremote.model.rules.flow.*;
 import org.openremote.model.rules.flow.definition.NodeImplementation;
 import org.openremote.model.rules.flow.definition.NodePair;
+import org.openremote.model.value.Values;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +62,7 @@ public class NodeStorageService implements ContainerService {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.NUMBER)
                 }),
-                info -> Optional.of((float) info.getInternals()[0].getValue())
+                info -> info.getInternals()[0].getValue()
         ));
 
         nodePairs.add(new NodePair(
@@ -67,7 +71,7 @@ public class NodeStorageService implements ContainerService {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.STRING)
                 }),
-                info -> Optional.of((String) info.getInternals()[0].getValue())
+                info -> info.getInternals()[0].getValue()
         ));
 
         nodePairs.add(new NodePair(
@@ -76,7 +80,7 @@ public class NodeStorageService implements ContainerService {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.ANY)
                 }),
-                info -> Optional.of(info.getInternals()[0].getValue())
+                info -> (info.getInternals()[0].getValue())
         ));
 
         nodePairs.add(new NodePair(
@@ -85,7 +89,20 @@ public class NodeStorageService implements ContainerService {
                 }, new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.ANY)
                 }, new NodeSocket[0]),
-                info -> Optional.of(info.getInternals()[0].getValue())
+                info -> Optional.of((RulesBuilder.Action) facts -> {
+                    AssetAttributeInternalValue assetAttributePair = (AssetAttributeInternalValue) info.getInternals()[0].getValue();
+                    NodeSocket inputSocket = info.getInputs()[0];
+                    Node inputNode = info.getCollection().getNodeById(inputSocket.getNodeId());
+                    Object value = getImplementationFor(inputNode.getName()).execute(
+                            new NodeExecutionRequestInfo(info.getCollection(), inputNode, inputSocket)
+                    );
+
+                    try {
+                        facts.updateAssetState(assetAttributePair.getAssetId(), assetAttributePair.getAttributeName(), Values.parseOrNull(Container.JSON.writeValueAsString(value)));
+                    } catch (JsonProcessingException e) {
+                        RulesEngine.LOG.severe("Flow rule error: node " + inputNode.getName() + " outputs invalid value");
+                    }
+                })
         ));
     }
 
@@ -104,5 +121,13 @@ public class NodeStorageService implements ContainerService {
 
     public List<NodeImplementation> getNodeImplementations() {
         return Collections.unmodifiableList(nodePairs.stream().map(NodePair::getImplementation).collect(Collectors.toList()));
+    }
+
+    public NodeImplementation getImplementationFor(String nodeName) throws IllegalArgumentException {
+        for (NodePair pair : nodePairs) {
+            if (pair.getDefinition().getName().equals((nodeName)))
+                return pair.getImplementation();
+        }
+        throw new IllegalArgumentException("Invalid node name");
     }
 }

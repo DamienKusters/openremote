@@ -20,6 +20,14 @@ public class NodeCollection {
         connections = new NodeConnection[]{};
     }
 
+    public Node getNodeById(String id) throws IllegalArgumentException {
+        for (Node node : nodes) {
+            if (node.getId().equals(id))
+                return node;
+        }
+        throw new IllegalArgumentException("Invalid ID");
+    }
+
     public String getName() {
         return name;
     }

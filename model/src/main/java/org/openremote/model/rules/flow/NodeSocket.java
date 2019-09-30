@@ -61,4 +61,11 @@ public class NodeSocket {
     public void setIndex(int index) {
         this.index = index;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof NodeSocket)
+            return ((NodeSocket) obj).id.equals(id);
+        else return false;
+    }
 }

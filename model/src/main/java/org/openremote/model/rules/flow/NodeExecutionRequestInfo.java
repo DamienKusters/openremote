@@ -1,5 +1,10 @@
 package org.openremote.model.rules.flow;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class NodeExecutionRequestInfo {
     private NodeCollection collection;
 
@@ -29,6 +34,30 @@ public class NodeExecutionRequestInfo {
         this.inputs = inputs;
         this.outputs = outputs;
         this.internals = internals;
+    }
+
+    public NodeExecutionRequestInfo(NodeCollection collection, Node node, NodeSocket socket) {
+        if (socket != null && Arrays.stream(node.getOutputs()).anyMatch(c -> c.getNodeId().equals(node.getId())))
+            throw new IllegalArgumentException("Given socket does not belong to given node");
+
+        this.collection = collection;
+        this.outputSocketIndex = java.util.Arrays.binarySearch(node.getOutputs(), socket);
+        this.outputSocket = socket;
+        this.node = node;
+
+        List<NodeSocket> inputs = new ArrayList<>();
+        for (NodeSocket s : node.getInputs()) {
+            inputs.addAll(Arrays.stream(collection.getConnections()).filter(c -> c.getTo().equals(s)).map(NodeConnection::getFrom).collect(Collectors.toList()));
+        }
+        this.inputs = inputs.toArray(new NodeSocket[0]);
+
+        List<NodeSocket> outputs = new ArrayList<>();
+        for (NodeSocket s : node.getOutputs()) {
+            outputs.addAll(Arrays.stream(collection.getConnections()).filter(c -> c.getFrom().equals(s)).map(NodeConnection::getTo).collect(Collectors.toList()));
+        }
+        this.outputs = outputs.toArray(new NodeSocket[0]);
+
+        this.internals = node.getInternals();
     }
 
     public NodeCollection getCollection() {

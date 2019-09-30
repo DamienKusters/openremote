@@ -30,6 +30,7 @@ import org.openremote.manager.notification.NotificationService;
 import org.openremote.manager.rules.facade.AssetsFacade;
 import org.openremote.manager.rules.facade.NotificationsFacade;
 import org.openremote.manager.rules.facade.UsersFacade;
+import org.openremote.manager.rules.flow.NodeStorageService;
 import org.openremote.manager.security.ManagerIdentityService;
 import org.openremote.model.asset.Asset;
 import org.openremote.model.attribute.AttributeType;
@@ -83,6 +84,7 @@ public class RulesEngine<T extends Ruleset> {
     final protected ManagerExecutorService executorService;
     final protected AssetStorageService assetStorageService;
     final protected ClientEventService clientEventService;
+    final protected NodeStorageService nodeStorageService;
 
     final protected RulesEngineId<T> id;
     final protected Assets assetsFacade;
@@ -115,12 +117,14 @@ public class RulesEngine<T extends Ruleset> {
                        AssetProcessingService assetProcessingService,
                        NotificationService notificationService,
                        ClientEventService clientEventService,
+                       NodeStorageService nodeStorageService,
                        RulesEngineId<T> id,
                        AssetLocationPredicateProcessor assetLocationPredicatesConsumer) {
         this.timerService = timerService;
         this.executorService = executorService;
         this.assetStorageService = assetStorageService;
         this.clientEventService = clientEventService;
+        this.nodeStorageService = nodeStorageService;
         this.id = id;
         AssetsFacade<T> assetsFacade = new AssetsFacade<>(id, assetStorageService, assetProcessingService::sendAttributeEvent);
         this.assetsFacade = assetsFacade;
@@ -219,7 +223,7 @@ public class RulesEngine<T extends Ruleset> {
             updateDeploymentInfo();
         }
 
-        deployment = new RulesetDeployment(ruleset, timerService, assetStorageService, executorService, assetsFacade, usersFacade, notificationFacade);
+        deployment = new RulesetDeployment(ruleset, timerService, assetStorageService, executorService, nodeStorageService, assetsFacade, usersFacade, notificationFacade);
         newlyAddedDeployments.add(deployment);
 
         boolean compilationSuccessful = deployment.start();
