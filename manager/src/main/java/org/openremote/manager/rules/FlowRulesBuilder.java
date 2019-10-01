@@ -3,6 +3,9 @@ package org.openremote.manager.rules;
 import org.jeasy.rules.api.Rule;
 import org.jeasy.rules.core.RuleBuilder;
 import org.openremote.manager.rules.flow.NodeStorageService;
+import org.openremote.model.rules.Assets;
+import org.openremote.model.rules.Notifications;
+import org.openremote.model.rules.Users;
 import org.openremote.model.rules.flow.Node;
 import org.openremote.model.rules.flow.NodeCollection;
 import org.openremote.model.rules.flow.NodeExecutionRequestInfo;
@@ -14,6 +17,10 @@ import java.util.List;
 public class FlowRulesBuilder extends RulesBuilder {
     private List<NodeCollection> nodeCollections = new ArrayList<>();
     private NodeStorageService nodeStorageService;
+
+    private Assets assets;
+    private Users users;
+    private Notifications notifications;
 
     public void add(NodeCollection nodeCollection) {
         nodeCollections.add(nodeCollection);
@@ -42,7 +49,7 @@ public class FlowRulesBuilder extends RulesBuilder {
 
     private Rule createRule(String name, NodeCollection collection, Node outputNode) throws Exception {
 
-        Object implementationResult = nodeStorageService.getImplementationFor(outputNode.getName()).execute(new NodeExecutionRequestInfo(collection, outputNode, null));
+        Object implementationResult = nodeStorageService.getImplementationFor(outputNode.getName()).execute(new NodeExecutionRequestInfo(collection, outputNode, null, assets, users, notifications));
         if (!(implementationResult instanceof Action))
             throw new Exception(outputNode.getName() + " node has an invalid implementation");
 
@@ -78,5 +85,29 @@ public class FlowRulesBuilder extends RulesBuilder {
 
     public void setNodeStorageService(NodeStorageService nodeStorageService) {
         this.nodeStorageService = nodeStorageService;
+    }
+
+    public Assets getAssets() {
+        return assets;
+    }
+
+    public void setAssets(Assets assets) {
+        this.assets = assets;
+    }
+
+    public Users getUsers() {
+        return users;
+    }
+
+    public void setUsers(Users users) {
+        this.users = users;
+    }
+
+    public Notifications getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(Notifications notifications) {
+        this.notifications = notifications;
     }
 }

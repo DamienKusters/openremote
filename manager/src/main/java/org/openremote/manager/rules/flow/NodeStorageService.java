@@ -83,27 +83,32 @@ public class NodeStorageService implements ContainerService {
                 info -> (info.getInternals()[0].getValue())
         ));
 
-/*        nodePairs.add(new NodePair(
+       nodePairs.add(new NodePair(
                 new Node(NodeType.OUTPUT, "Write attribute", new NodeInternal[]{
                         new NodeInternal("Attribute", new Picker("Asset Attribute", PickerType.ASSET_ATTRIBUTE))
                 }, new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.ANY)
                 }, new NodeSocket[0]),
                 info -> ((RulesBuilder.Action) facts -> {
-                    AssetAttributeInternalValue assetAttributePair = (AssetAttributeInternalValue) info.getInternals()[0].getValue();
+                    AssetAttributeInternalValue assetAttributePair = Container.JSON.convertValue( info.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
                     NodeSocket inputSocket = info.getInputs()[0];
                     Node inputNode = info.getCollection().getNodeById(inputSocket.getNodeId());
                     Object value = getImplementationFor(inputNode.getName()).execute(
-                            new NodeExecutionRequestInfo(info.getCollection(), inputNode, inputSocket)
+                            new NodeExecutionRequestInfo(info.getCollection(), inputNode, inputSocket, info.getAssets(), info.getUsers(), info.getNotifications())
                     );
 
                     try {
-                        facts.updateAssetState(assetAttributePair.getAssetId(), assetAttributePair.getAttributeName(), Values.parseOrNull(Container.JSON.writeValueAsString(value)));
+                        info.getAssets().dispatch(
+                                assetAttributePair.getAssetId(),
+                                assetAttributePair.getAttributeName(),
+                                Values.parseOrNull(Container.JSON.writeValueAsString(value))
+                        );
+                        //facts.updateAssetState(assetAttributePair.getAssetId(), assetAttributePair.getAttributeName(), Values.parseOrNull(Container.JSON.writeValueAsString(value)));
                     } catch (JsonProcessingException e) {
                         RulesEngine.LOG.severe("Flow rule error: node " + inputNode.getName() + " outputs invalid value");
                     }
                 })
-        ));*/
+        ));
 
         nodePairs.add(new NodePair(
                 new Node(NodeType.OUTPUT, "Log", new NodeInternal[]{
@@ -120,7 +125,7 @@ public class NodeStorageService implements ContainerService {
                     NodeSocket inputSocket = info.getInputs()[0];
                     Node inputNode = info.getCollection().getNodeById(inputSocket.getNodeId());
                     Object value = getImplementationFor(inputNode.getName()).execute(
-                            new NodeExecutionRequestInfo(info.getCollection(), inputNode, inputSocket)
+                            new NodeExecutionRequestInfo(info.getCollection(), inputNode, inputSocket, info.getAssets(), info.getUsers(), info.getNotifications())
                     );
 
                     try {

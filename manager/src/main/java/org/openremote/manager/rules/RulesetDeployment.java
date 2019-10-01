@@ -406,14 +406,15 @@ public class RulesetDeployment {
     }
 
     protected boolean startRulesFlow(Ruleset ruleset, Assets assetsFacade, Users usersFacade, NotificationsFacade consolesFacade) {
-        // de-serialise rule json stuff here, build the actual rule by traversing through every node from each output
-        // returning false for now because i still need to do the model stuff
-
         try {
             NodeCollection nodeCollection = Container.JSON.readValue(ruleset.getRules(), NodeCollection.class);
 
             FlowRulesBuilder rulesBuilder = new FlowRulesBuilder();
+            rulesBuilder.setAssets(assetsFacade);
+            rulesBuilder.setUsers(usersFacade);
+            rulesBuilder.setNotifications(consolesFacade);
             rulesBuilder.setNodeStorageService(nodeStorageService);
+
             rulesBuilder.add(nodeCollection);
             for (Rule rule : rulesBuilder.build()) {
                 RulesEngine.LOG.info("Registering rule: " + rule.getName());

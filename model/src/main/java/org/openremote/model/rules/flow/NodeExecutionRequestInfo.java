@@ -1,5 +1,9 @@
 package org.openremote.model.rules.flow;
 
+import org.openremote.model.rules.Assets;
+import org.openremote.model.rules.Notifications;
+import org.openremote.model.rules.Users;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +20,10 @@ public class NodeExecutionRequestInfo {
     private NodeSocket[] outputs;
     private NodeInternal[] internals;
 
+    private Assets assets;
+    private Users users;
+    private Notifications notifications;
+
     public NodeExecutionRequestInfo() {
         collection = new NodeCollection();
         outputSocketIndex = -1;
@@ -24,9 +32,13 @@ public class NodeExecutionRequestInfo {
         inputs = new NodeSocket[]{};
         outputs = new NodeSocket[]{};
         internals = new NodeInternal[]{};
+
+        assets = null;
+        users = null;
+        notifications = null;
     }
 
-    public NodeExecutionRequestInfo(NodeCollection collection, int outputSocketIndex, NodeSocket outputSocket, Node node, NodeSocket[] inputs, NodeSocket[] outputs, NodeInternal[] internals) {
+    public NodeExecutionRequestInfo(NodeCollection collection, int outputSocketIndex, NodeSocket outputSocket, Node node, NodeSocket[] inputs, NodeSocket[] outputs, NodeInternal[] internals, Assets assets, Users users, Notifications notifications) {
         this.collection = collection;
         this.outputSocketIndex = outputSocketIndex;
         this.outputSocket = outputSocket;
@@ -34,9 +46,12 @@ public class NodeExecutionRequestInfo {
         this.inputs = inputs;
         this.outputs = outputs;
         this.internals = internals;
+        this.assets = assets;
+        this.users = users;
+        this.notifications = notifications;
     }
 
-    public NodeExecutionRequestInfo(NodeCollection collection, Node node, NodeSocket socket) {
+    public NodeExecutionRequestInfo(NodeCollection collection, Node node, NodeSocket socket, Assets assets, Users users, Notifications notifications) {
         if (socket != null && Arrays.stream(node.getOutputs()).noneMatch(c -> c.getNodeId().equals(node.getId())))
             throw new IllegalArgumentException("Given socket does not belong to given node");
 
@@ -55,9 +70,13 @@ public class NodeExecutionRequestInfo {
         for (NodeSocket s : node.getOutputs()) {
             outputs.addAll(Arrays.stream(collection.getConnections()).filter(c -> c.getFrom().equals(s)).map(NodeConnection::getTo).collect(Collectors.toList()));
         }
-        this.outputs = outputs.toArray(new NodeSocket[0]);
 
+        this.outputs = outputs.toArray(new NodeSocket[0]);
         this.internals = node.getInternals();
+
+        this.assets = assets;
+        this.users = users;
+        this.notifications = notifications;
     }
 
     public NodeCollection getCollection() {
@@ -114,5 +133,29 @@ public class NodeExecutionRequestInfo {
 
     public void setInternals(NodeInternal[] internals) {
         this.internals = internals;
+    }
+
+    public Assets getAssets() {
+        return assets;
+    }
+
+    public void setAssets(Assets assets) {
+        this.assets = assets;
+    }
+
+    public Users getUsers() {
+        return users;
+    }
+
+    public void setUsers(Users users) {
+        this.users = users;
+    }
+
+    public Notifications getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(Notifications notifications) {
+        this.notifications = notifications;
     }
 }
