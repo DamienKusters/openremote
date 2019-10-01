@@ -412,7 +412,7 @@ public class RulesetDeployment {
             FlowRulesBuilder rulesBuilder = new FlowRulesBuilder();
             rulesBuilder.setAssets(assetsFacade);
             rulesBuilder.setUsers(usersFacade);
-            rulesBuilder.setNotifications(consolesFacade);
+            rulesBuilder.setNotification(consolesFacade);
             rulesBuilder.setNodeStorageService(nodeStorageService);
 
             rulesBuilder.add(nodeCollection);

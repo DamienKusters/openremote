@@ -2,25 +2,29 @@ package org.openremote.manager.rules;
 
 import org.jeasy.rules.api.Rule;
 import org.jeasy.rules.core.RuleBuilder;
+import org.openremote.container.Container;
+import org.openremote.manager.rules.flow.NodeExecutionRequestInfo;
 import org.openremote.manager.rules.flow.NodeStorageService;
-import org.openremote.model.rules.Assets;
-import org.openremote.model.rules.Notifications;
-import org.openremote.model.rules.Users;
-import org.openremote.model.rules.flow.Node;
-import org.openremote.model.rules.flow.NodeCollection;
-import org.openremote.model.rules.flow.NodeExecutionRequestInfo;
-import org.openremote.model.rules.flow.NodeType;
+import org.openremote.model.query.AssetQuery;
+import org.openremote.model.rules.*;
+import org.openremote.model.rules.flow.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FlowRulesBuilder extends RulesBuilder {
+    //TODO REMOVE ASAP
+    private static long lastRan;
     private List<NodeCollection> nodeCollections = new ArrayList<>();
     private NodeStorageService nodeStorageService;
-
-    private Assets assets;
+    // private RulesFacts facts;
+    private Notifications notification;
     private Users users;
-    private Notifications notifications;
+    private Assets assets;
 
     public void add(NodeCollection nodeCollection) {
         nodeCollections.add(nodeCollection);
@@ -48,13 +52,39 @@ public class FlowRulesBuilder extends RulesBuilder {
     }
 
     private Rule createRule(String name, NodeCollection collection, Node outputNode) throws Exception {
+        Object implementationResult = nodeStorageService.getImplementationFor(outputNode.getName()).execute(new NodeExecutionRequestInfo(collection, outputNode, null, null, assets, users, notification));
 
-        Object implementationResult = nodeStorageService.getImplementationFor(outputNode.getName()).execute(new NodeExecutionRequestInfo(collection, outputNode, null, assets, users, notifications));
+        if (implementationResult == null)
+            throw new NullPointerException(outputNode.getName() + " node returns null");
+
         if (!(implementationResult instanceof Action))
-            throw new Exception(outputNode.getName() + " node has an invalid implementation");
+            throw new Exception(outputNode.getName() + " node does not return an action");
 
-        //TODO traverse nodes to get condition
-        Condition condition = facts -> true;
+        Condition condition = facts -> {
+            List<Node> connectedTree = backtrackFrom(collection, outputNode);
+
+            Collection<TemporaryFact<AssetState>> allEvents = facts.getAssetEvents();
+
+            //TODO: should there be hardcoded (always available no matter the user configuration) asset (read, write) nodes?
+            // Definitely don't check by name and assume internal types if not (and even if, this isn't great)
+            return connectedTree.stream().filter(c -> c.getName().equals("Read attribute")).anyMatch(c -> {
+                AssetAttributeInternalValue internal = Container.JSON.convertValue(c.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
+                String assetId = internal.getAssetId();
+                String attributeName = internal.getAttributeName();
+/*
+                List<TemporaryFact<AssetState>> states = facts.matchAssetEvent(new AssetQuery().
+                        select(AssetQuery.Select.selectAll()).
+                        ids(assetId)).collect(Collectors.toList());
+*/
+
+                return allEvents.stream().filter(v -> v.getFact().getId().equals(assetId)).anyMatch(fact -> {
+                    long timestamp = fact.getFact().getTimestamp();
+                    RulesEngine.RULES_LOG.warning("COMPARING " + timestamp + " TO BE MORE THAN " + lastRan);
+                    return timestamp > lastRan;
+                });
+            });
+        };
+
         Action action = (Action) implementationResult;
 
         return new RuleBuilder().
@@ -75,8 +105,25 @@ public class FlowRulesBuilder extends RulesBuilder {
                 }).
                 then(facts -> {
                     action.execute((RulesFacts) facts);
+                    lastRan = ((RulesFacts) facts).timerService.getCurrentTimeMillis();
                 }).
                 build();
+    }
+
+    private List<Node> backtrackFrom(NodeCollection collection, Node node) {
+        List<Node> total = new ArrayList<>();
+        List<Node> children = new ArrayList<>();
+
+        for (NodeSocket s : node.getInputs()) {
+            children.addAll(Arrays.stream(collection.getConnections()).filter(c -> c.getTo().equals(s)).map(c -> collection.getNodeById(c.getFrom().getNodeId())).collect(Collectors.toList()));
+        }
+
+        for (Node child : children) {
+            total.add(child);
+            total.addAll(backtrackFrom(collection, child));
+        }
+
+        return total;
     }
 
     public NodeStorageService getNodeStorageService() {
@@ -87,12 +134,12 @@ public class FlowRulesBuilder extends RulesBuilder {
         this.nodeStorageService = nodeStorageService;
     }
 
-    public Assets getAssets() {
-        return assets;
+    public Notifications getNotification() {
+        return notification;
     }
 
-    public void setAssets(Assets assets) {
-        this.assets = assets;
+    public void setNotification(Notifications notification) {
+        this.notification = notification;
     }
 
     public Users getUsers() {
@@ -103,11 +150,11 @@ public class FlowRulesBuilder extends RulesBuilder {
         this.users = users;
     }
 
-    public Notifications getNotifications() {
-        return notifications;
+    public Assets getAssets() {
+        return assets;
     }
 
-    public void setNotifications(Notifications notifications) {
-        this.notifications = notifications;
+    public void setAssets(Assets assets) {
+        this.assets = assets;
     }
 }

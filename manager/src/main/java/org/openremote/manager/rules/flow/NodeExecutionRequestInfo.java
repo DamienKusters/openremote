@@ -1,8 +1,10 @@
-package org.openremote.model.rules.flow;
+package org.openremote.manager.rules.flow;
 
+import org.openremote.manager.rules.RulesFacts;
 import org.openremote.model.rules.Assets;
 import org.openremote.model.rules.Notifications;
 import org.openremote.model.rules.Users;
+import org.openremote.model.rules.flow.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +22,8 @@ public class NodeExecutionRequestInfo {
     private NodeSocket[] outputs;
     private NodeInternal[] internals;
 
+    private RulesFacts facts;
+
     private Assets assets;
     private Users users;
     private Notifications notifications;
@@ -32,13 +36,13 @@ public class NodeExecutionRequestInfo {
         inputs = new NodeSocket[]{};
         outputs = new NodeSocket[]{};
         internals = new NodeInternal[]{};
-
+        facts = null;
         assets = null;
         users = null;
         notifications = null;
     }
 
-    public NodeExecutionRequestInfo(NodeCollection collection, int outputSocketIndex, NodeSocket outputSocket, Node node, NodeSocket[] inputs, NodeSocket[] outputs, NodeInternal[] internals, Assets assets, Users users, Notifications notifications) {
+    public NodeExecutionRequestInfo(NodeCollection collection, int outputSocketIndex, NodeSocket outputSocket, Node node, NodeSocket[] inputs, NodeSocket[] outputs, NodeInternal[] internals, RulesFacts facts, Assets assets, Users users, Notifications notifications) {
         this.collection = collection;
         this.outputSocketIndex = outputSocketIndex;
         this.outputSocket = outputSocket;
@@ -46,12 +50,13 @@ public class NodeExecutionRequestInfo {
         this.inputs = inputs;
         this.outputs = outputs;
         this.internals = internals;
+        this.facts = facts;
         this.assets = assets;
         this.users = users;
         this.notifications = notifications;
     }
 
-    public NodeExecutionRequestInfo(NodeCollection collection, Node node, NodeSocket socket, Assets assets, Users users, Notifications notifications) {
+    public NodeExecutionRequestInfo(NodeCollection collection, Node node, NodeSocket socket, RulesFacts facts, Assets assets, Users users, Notifications notifications) {
         if (socket != null && Arrays.stream(node.getOutputs()).noneMatch(c -> c.getNodeId().equals(node.getId())))
             throw new IllegalArgumentException("Given socket does not belong to given node");
 
@@ -74,6 +79,7 @@ public class NodeExecutionRequestInfo {
         this.outputs = outputs.toArray(new NodeSocket[0]);
         this.internals = node.getInternals();
 
+        this.facts = facts;
         this.assets = assets;
         this.users = users;
         this.notifications = notifications;
@@ -157,5 +163,13 @@ public class NodeExecutionRequestInfo {
 
     public void setNotifications(Notifications notifications) {
         this.notifications = notifications;
+    }
+
+    public RulesFacts getFacts() {
+        return facts;
+    }
+
+    public void setFacts(RulesFacts facts) {
+        this.facts = facts;
     }
 }
