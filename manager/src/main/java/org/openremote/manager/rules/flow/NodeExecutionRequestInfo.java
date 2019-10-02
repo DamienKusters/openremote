@@ -1,7 +1,6 @@
 package org.openremote.manager.rules.flow;
 
 import org.openremote.manager.rules.RulesFacts;
-import org.openremote.manager.rules.flow.definition.NodeImplementation;
 import org.openremote.model.rules.Assets;
 import org.openremote.model.rules.Notifications;
 import org.openremote.model.rules.Users;
@@ -87,7 +86,7 @@ public class NodeExecutionRequestInfo {
     }
 
     public Object getValueFromInput(int index, NodeStorageService storage) {
-        NodeSocket aSocket = getInputs()[0];
+        NodeSocket aSocket = getInputs()[index];
         Node aNode = getCollection().getNodeById(aSocket.getNodeId());
         return storage.getImplementationFor(aNode.getName()).execute(
                 new NodeExecutionRequestInfo(getCollection(), aNode, aSocket, getFacts(), getAssets(), getUsers(), getNotifications())

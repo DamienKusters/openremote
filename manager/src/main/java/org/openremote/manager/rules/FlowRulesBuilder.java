@@ -12,18 +12,14 @@ import org.openremote.model.rules.Notifications;
 import org.openremote.model.rules.Users;
 import org.openremote.model.rules.flow.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class FlowRulesBuilder extends RulesBuilder {
-    //TODO REMOVE ASAP
-    private static long lastRan;
+    private Map<Action, Long> lastRanMap = new LinkedHashMap<>();
+
     private List<NodeCollection> nodeCollections = new ArrayList<>();
     private NodeStorageService nodeStorageService;
-    // private RulesFacts facts;
     private Notifications notification;
     private Users users;
     private Assets assets;
@@ -62,6 +58,8 @@ public class FlowRulesBuilder extends RulesBuilder {
         if (!(implementationResult instanceof Action))
             throw new Exception(outputNode.getName() + " node does not return an action");
 
+        Action action = (Action) implementationResult;
+
         Condition condition = facts -> {
             List<Node> connectedTree = backtrackFrom(collection, outputNode);
 
@@ -71,22 +69,17 @@ public class FlowRulesBuilder extends RulesBuilder {
                 AssetAttributeInternalValue internal = Container.JSON.convertValue(c.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
                 String assetId = internal.getAssetId();
                 String attributeName = internal.getAttributeName();
-
-                facts.
-
                 List<AssetState> allAssets = facts.matchAssetState(new AssetQuery().
                         select(AssetQuery.Select.selectAll()).ids(assetId).attributeName(attributeName)
                 ).collect(Collectors.toList());
 
                 return allAssets.stream().anyMatch(state -> {
                     long timestamp = state.getTimestamp();
-                    RulesEngine.RULES_LOG.warning("COMPARING " + timestamp + " TO BE MORE THAN " + lastRan);
-                    return timestamp > lastRan;
+                    RulesEngine.RULES_LOG.info("Firing rule when " + timestamp + " is more than " + lastRanMap.get(action));
+                    return timestamp > lastRanMap.getOrDefault(action, -1L);
                 });
             });
         };
-
-        Action action = (Action) implementationResult;
 
         return new RuleBuilder().
                 name(name).
@@ -106,7 +99,7 @@ public class FlowRulesBuilder extends RulesBuilder {
                 }).
                 then(facts -> {
                     action.execute((RulesFacts) facts);
-                    lastRan = ((RulesFacts) facts).timerService.getCurrentTimeMillis();
+                    lastRanMap.put(action, ((RulesFacts) facts).timerService.getCurrentTimeMillis());
                 }).
                 build();
     }

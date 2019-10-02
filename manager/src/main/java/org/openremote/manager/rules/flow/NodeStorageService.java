@@ -6,14 +6,13 @@ import org.openremote.container.ContainerService;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.rules.RulesBuilder;
 import org.openremote.manager.rules.RulesEngine;
-import org.openremote.manager.rules.flow.definition.NodeImplementation;
-import org.openremote.manager.rules.flow.definition.NodePair;
+import org.openremote.manager.rules.flow.collections.RequiredCollection;
+import org.openremote.manager.rules.flow.collections.StandardCollection;
 import org.openremote.manager.security.ManagerIdentityService;
 import org.openremote.manager.web.ManagerWebService;
 import org.openremote.model.query.AssetQuery;
 import org.openremote.model.rules.AssetState;
 import org.openremote.model.rules.flow.*;
-import org.openremote.model.value.NumberValue;
 import org.openremote.model.value.Value;
 import org.openremote.model.value.Values;
 
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class NodeStorageService implements ContainerService {
@@ -47,132 +45,8 @@ public class NodeStorageService implements ContainerService {
 
     @Override
     public void start(Container container) throws Exception {
-        //TODO: remove this
-
-        nodePairs.add(new NodePair(
-                new Node(NodeType.INPUT, "Boolean", new NodeInternal[]{
-                        new NodeInternal("Value", new Picker("Boolean", PickerType.DROPDOWN, new Option[]{
-                                new Option("True", true),
-                                new Option("False", false)
-                        }))
-                }, new NodeSocket[0], new NodeSocket[]{
-                        new NodeSocket("value", NodeDataType.BOOLEAN)
-                }),
-                info -> Values.create((boolean) info.getInternals()[0].getValue())
-        ));
-
-        nodePairs.add(new NodePair(
-                new Node(NodeType.INPUT, "Number", new NodeInternal[]{
-                        new NodeInternal("Value", new Picker("Number", PickerType.NUMBER))
-                }, new NodeSocket[0], new NodeSocket[]{
-                        new NodeSocket("value", NodeDataType.NUMBER)
-                }),
-                info -> Values.create((float) info.getInternals()[0].getValue())
-        ));
-
-        nodePairs.add(new NodePair(
-                new Node(NodeType.INPUT, "Text", new NodeInternal[]{
-                        new NodeInternal("Value", new Picker("Text", PickerType.MULTILINE))
-                }, new NodeSocket[0], new NodeSocket[]{
-                        new NodeSocket("value", NodeDataType.STRING)
-                }),
-                info -> Values.create((String) info.getInternals()[0].getValue())
-        ));
-
-        nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR, "Add", new NodeInternal[0], new NodeSocket[]{
-                        new NodeSocket("a", NodeDataType.NUMBER),
-                        new NodeSocket("b", NodeDataType.NUMBER),
-                }, new NodeSocket[]{
-                        new NodeSocket("c", NodeDataType.NUMBER),
-                }),
-                info -> {
-                    NumberValue a = (NumberValue) info.getValueFromInput(0, this);
-                    NumberValue b = (NumberValue) info.getValueFromInput(1, this);
-                    return Values.create(a.getNumber() + b.getNumber());
-                }
-        ));
-
-        nodePairs.add(new NodePair(
-                new Node(NodeType.INPUT, "Read attribute", new NodeInternal[]{
-                        new NodeInternal("Attribute", new Picker("Asset Attribute", PickerType.ASSET_ATTRIBUTE))
-                }, new NodeSocket[0], new NodeSocket[]{
-                        new NodeSocket("value", NodeDataType.ANY)
-                }),
-                info -> {
-                    AssetAttributeInternalValue assetAttributePair = Container.JSON.convertValue(info.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
-                    String assetId = assetAttributePair.getAssetId();
-                    String attributeName = assetAttributePair.getAttributeName();
-                    Optional<AssetState> readValue = info.getFacts().matchFirstAssetState(new AssetQuery().select(AssetQuery.Select.selectAll()).ids(assetId).attributeName(attributeName));
-                    if (!readValue.isPresent()) return null;
-                    return readValue.get().getValue().orElse(null);
-                }
-        ));
-
-        nodePairs.add(new NodePair(
-                new Node(NodeType.OUTPUT, "Write attribute", new NodeInternal[]{
-                        new NodeInternal("Attribute", new Picker("Asset Attribute", PickerType.ASSET_ATTRIBUTE))
-                }, new NodeSocket[]{
-                        new NodeSocket("value", NodeDataType.ANY)
-                }, new NodeSocket[0]),
-                info -> ((RulesBuilder.Action) facts -> {
-                    info.setFacts(facts);
-                    Object value = info.getValueFromInput(0, this);
-
-                    AssetAttributeInternalValue assetAttributePair = Container.JSON.convertValue(info.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
-
-                    try {
-                        if (value instanceof Value) {
-                            info.getAssets().dispatch(
-                                    assetAttributePair.getAssetId(),
-                                    assetAttributePair.getAttributeName(),
-                                    (Value) value
-                            );
-                        } else {
-                            info.getAssets().dispatch(
-                                    assetAttributePair.getAssetId(),
-                                    assetAttributePair.getAttributeName(),
-                                    Values.parseOrNull(Container.JSON.writeValueAsString(value))
-                            );
-                        }
-                    } catch (JsonProcessingException e) {
-                        RulesEngine.LOG.severe("Flow rule error: node " + info.getNode().getName() + " receives invalid value");
-                    }
-                })
-        ));
-
-        nodePairs.add(new NodePair(
-                new Node(NodeType.OUTPUT, "Log", new NodeInternal[]{
-                        new NodeInternal("Level", new Picker("Log level", PickerType.DROPDOWN, new Option[]{
-                                new Option("Info", 0),
-                                new Option("Warning", 1),
-                                new Option("Severe", 2),
-                        }))
-                }, new NodeSocket[]{
-                        new NodeSocket("message", NodeDataType.ANY)
-                }, new NodeSocket[0]),
-                info -> ((RulesBuilder.Action) facts -> {
-                    info.setFacts(facts);
-                    Object value = info.getValueFromInput(0, this);
-
-                    try {
-                        switch ((int) info.getInternals()[0].getValue()) {
-                            case 0:
-                                RulesEngine.LOG.log(Level.INFO, "Flow rule " + info.getCollection().getName() + ": " + Container.JSON.writeValueAsString(value));
-                                break;
-                            case 1:
-                                RulesEngine.LOG.log(Level.WARNING, "Flow rule " + info.getCollection().getName() + ": " + Container.JSON.writeValueAsString(value));
-                                break;
-                            case 2:
-                                RulesEngine.LOG.log(Level.SEVERE, "Flow rule " + info.getCollection().getName() + ": " + Container.JSON.writeValueAsString(value));
-                                break;
-                        }
-
-                    } catch (JsonProcessingException e) {
-                        RulesEngine.LOG.severe("Flow rule error: node " + info.getNode().getName() + " receives invalid value");
-                    }
-                })
-        ));
+        nodePairs.addAll(new RequiredCollection().generate(this));
+        nodePairs.addAll(new StandardCollection().generate(this));
     }
 
     @Override

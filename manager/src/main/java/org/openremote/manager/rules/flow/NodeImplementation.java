@@ -1,4 +1,4 @@
-package org.openremote.manager.rules.flow.definition;
+package org.openremote.manager.rules.flow;
 
 import org.openremote.manager.rules.flow.NodeExecutionRequestInfo;
 
