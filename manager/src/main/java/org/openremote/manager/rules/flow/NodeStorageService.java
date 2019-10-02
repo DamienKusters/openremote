@@ -11,7 +11,10 @@ import org.openremote.manager.rules.flow.definition.NodePair;
 import org.openremote.manager.security.ManagerIdentityService;
 import org.openremote.manager.web.ManagerWebService;
 import org.openremote.model.query.AssetQuery;
+import org.openremote.model.rules.AssetState;
 import org.openremote.model.rules.flow.*;
+import org.openremote.model.value.NumberValue;
+import org.openremote.model.value.Value;
 import org.openremote.model.value.Values;
 
 import java.util.ArrayList;
@@ -55,7 +58,7 @@ public class NodeStorageService implements ContainerService {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.BOOLEAN)
                 }),
-                info -> (info.getInternals()[0].getValue())
+                info -> Values.create((boolean) info.getInternals()[0].getValue())
         ));
 
         nodePairs.add(new NodePair(
@@ -64,7 +67,7 @@ public class NodeStorageService implements ContainerService {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.NUMBER)
                 }),
-                info -> (info.getInternals()[0].getValue())
+                info -> Values.create((float) info.getInternals()[0].getValue())
         ));
 
         nodePairs.add(new NodePair(
@@ -73,7 +76,21 @@ public class NodeStorageService implements ContainerService {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.STRING)
                 }),
-                info -> (info.getInternals()[0].getValue())
+                info -> Values.create((String) info.getInternals()[0].getValue())
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "Add", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("a", NodeDataType.NUMBER),
+                        new NodeSocket("b", NodeDataType.NUMBER),
+                }, new NodeSocket[]{
+                        new NodeSocket("c", NodeDataType.NUMBER),
+                }),
+                info -> {
+                    NumberValue a = (NumberValue) info.getValueFromInput(0, this);
+                    NumberValue b = (NumberValue) info.getValueFromInput(1, this);
+                    return Values.create(a.getNumber() + b.getNumber());
+                }
         ));
 
         nodePairs.add(new NodePair(
@@ -86,7 +103,9 @@ public class NodeStorageService implements ContainerService {
                     AssetAttributeInternalValue assetAttributePair = Container.JSON.convertValue(info.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
                     String assetId = assetAttributePair.getAssetId();
                     String attributeName = assetAttributePair.getAttributeName();
-                    return info.getFacts().matchFirstAssetState(new AssetQuery().select(AssetQuery.Select.selectAll()).ids(assetId).attributeName(attributeName));
+                    Optional<AssetState> readValue = info.getFacts().matchFirstAssetState(new AssetQuery().select(AssetQuery.Select.selectAll()).ids(assetId).attributeName(attributeName));
+                    if (!readValue.isPresent()) return null;
+                    return readValue.get().getValue().orElse(null);
                 }
         ));
 
@@ -97,21 +116,27 @@ public class NodeStorageService implements ContainerService {
                         new NodeSocket("value", NodeDataType.ANY)
                 }, new NodeSocket[0]),
                 info -> ((RulesBuilder.Action) facts -> {
+                    info.setFacts(facts);
+                    Object value = info.getValueFromInput(0, this);
+
                     AssetAttributeInternalValue assetAttributePair = Container.JSON.convertValue(info.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
-                    NodeSocket inputSocket = info.getInputs()[0];
-                    Node inputNode = info.getCollection().getNodeById(inputSocket.getNodeId());
-                    Object value = getImplementationFor(inputNode.getName()).execute(
-                            new NodeExecutionRequestInfo(info.getCollection(), inputNode, inputSocket, facts, info.getAssets(), info.getUsers(), info.getNotifications())
-                    );
 
                     try {
-                        info.getAssets().dispatch(
-                                assetAttributePair.getAssetId(),
-                                assetAttributePair.getAttributeName(),
-                                Values.parseOrNull(Container.JSON.writeValueAsString(value))
-                        );
+                        if (value instanceof Value) {
+                            info.getAssets().dispatch(
+                                    assetAttributePair.getAssetId(),
+                                    assetAttributePair.getAttributeName(),
+                                    (Value) value
+                            );
+                        } else {
+                            info.getAssets().dispatch(
+                                    assetAttributePair.getAssetId(),
+                                    assetAttributePair.getAttributeName(),
+                                    Values.parseOrNull(Container.JSON.writeValueAsString(value))
+                            );
+                        }
                     } catch (JsonProcessingException e) {
-                        RulesEngine.LOG.severe("Flow rule error: node " + inputNode.getName() + " outputs invalid value");
+                        RulesEngine.LOG.severe("Flow rule error: node " + info.getNode().getName() + " receives invalid value");
                     }
                 })
         ));
@@ -127,11 +152,8 @@ public class NodeStorageService implements ContainerService {
                         new NodeSocket("message", NodeDataType.ANY)
                 }, new NodeSocket[0]),
                 info -> ((RulesBuilder.Action) facts -> {
-                    NodeSocket inputSocket = info.getInputs()[0];
-                    Node inputNode = info.getCollection().getNodeById(inputSocket.getNodeId());
-                    Object value = getImplementationFor(inputNode.getName()).execute(
-                            new NodeExecutionRequestInfo(info.getCollection(), inputNode, inputSocket, facts, info.getAssets(), info.getUsers(), info.getNotifications())
-                    );
+                    info.setFacts(facts);
+                    Object value = info.getValueFromInput(0, this);
 
                     try {
                         switch ((int) info.getInternals()[0].getValue()) {
@@ -147,7 +169,7 @@ public class NodeStorageService implements ContainerService {
                         }
 
                     } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                        RulesEngine.LOG.severe("Flow rule error: node " + info.getNode().getName() + " receives invalid value");
                     }
                 })
         ));

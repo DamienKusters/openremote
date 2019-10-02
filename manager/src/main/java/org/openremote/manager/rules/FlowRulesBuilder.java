@@ -6,12 +6,14 @@ import org.openremote.container.Container;
 import org.openremote.manager.rules.flow.NodeExecutionRequestInfo;
 import org.openremote.manager.rules.flow.NodeStorageService;
 import org.openremote.model.query.AssetQuery;
-import org.openremote.model.rules.*;
+import org.openremote.model.rules.AssetState;
+import org.openremote.model.rules.Assets;
+import org.openremote.model.rules.Notifications;
+import org.openremote.model.rules.Users;
 import org.openremote.model.rules.flow.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,22 +65,21 @@ public class FlowRulesBuilder extends RulesBuilder {
         Condition condition = facts -> {
             List<Node> connectedTree = backtrackFrom(collection, outputNode);
 
-            Collection<TemporaryFact<AssetState>> allEvents = facts.getAssetEvents();
-
             //TODO: should there be hardcoded (always available no matter the user configuration) asset (read, write) nodes?
             // Definitely don't check by name and assume internal types if not (and even if, this isn't great)
             return connectedTree.stream().filter(c -> c.getName().equals("Read attribute")).anyMatch(c -> {
                 AssetAttributeInternalValue internal = Container.JSON.convertValue(c.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
                 String assetId = internal.getAssetId();
                 String attributeName = internal.getAttributeName();
-/*
-                List<TemporaryFact<AssetState>> states = facts.matchAssetEvent(new AssetQuery().
-                        select(AssetQuery.Select.selectAll()).
-                        ids(assetId)).collect(Collectors.toList());
-*/
 
-                return allEvents.stream().filter(v -> v.getFact().getId().equals(assetId)).anyMatch(fact -> {
-                    long timestamp = fact.getFact().getTimestamp();
+                facts.
+
+                List<AssetState> allAssets = facts.matchAssetState(new AssetQuery().
+                        select(AssetQuery.Select.selectAll()).ids(assetId).attributeName(attributeName)
+                ).collect(Collectors.toList());
+
+                return allAssets.stream().anyMatch(state -> {
+                    long timestamp = state.getTimestamp();
                     RulesEngine.RULES_LOG.warning("COMPARING " + timestamp + " TO BE MORE THAN " + lastRan);
                     return timestamp > lastRan;
                 });
