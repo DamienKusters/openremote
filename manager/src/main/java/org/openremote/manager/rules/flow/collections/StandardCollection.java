@@ -78,6 +78,46 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "Or", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("a", NodeDataType.BOOLEAN),
+                        new NodeSocket("b", NodeDataType.BOOLEAN),
+                }, new NodeSocket[]{
+                        new NodeSocket("c", NodeDataType.BOOLEAN),
+                }),
+                info -> {
+                    BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
+                    BooleanValue b = (BooleanValue) info.getValueFromInput(1, storage);
+                    return Values.create(a.getBoolean() || b.getBoolean());
+                }
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "More than", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("a", NodeDataType.NUMBER),
+                        new NodeSocket("b", NodeDataType.NUMBER),
+                }, new NodeSocket[]{
+                        new NodeSocket("c", NodeDataType.BOOLEAN),
+                }),
+                info -> {
+                    NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
+                    NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
+                    return Values.create(a.getNumber() > b.getNumber());
+                }
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "Not", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("i", NodeDataType.BOOLEAN),
+                }, new NodeSocket[]{
+                        new NodeSocket("o", NodeDataType.BOOLEAN),
+                }),
+                info -> {
+                    BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
+                    return Values.create(!a.getBoolean());
+                }
+        ));
+
+        nodePairs.add(new NodePair(
                 new Node(NodeType.OUTPUT, "Log", new NodeInternal[]{
                         new NodeInternal("Level", new Picker("Log level", PickerType.DROPDOWN, new Option[]{
                                 new Option("Info", 0),
