@@ -121,7 +121,7 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR, "&&", "And", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR, "AND", "And", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.BOOLEAN),
                         new NodeSocket("b", NodeDataType.BOOLEAN),
                 }, new NodeSocket[]{
@@ -139,7 +139,7 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR,"||", "Or", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR,"OR", "Or", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.BOOLEAN),
                         new NodeSocket("b", NodeDataType.BOOLEAN),
                 }, new NodeSocket[]{
@@ -193,7 +193,7 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR,"!", "Not", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR,"NOT", "Not", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("i", NodeDataType.BOOLEAN),
                 }, new NodeSocket[]{
                         new NodeSocket("o", NodeDataType.BOOLEAN),
