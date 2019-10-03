@@ -28,7 +28,12 @@ public class StandardCollection implements NodePairCollection {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.BOOLEAN)
                 }),
-                info -> Values.create((boolean) info.getInternals()[0].getValue())
+                info -> {
+                    Object value = info.getInternals()[0].getValue();
+                    if (value == null) return Values.create(false);
+                    if (!(value instanceof Boolean)) return Values.create(false);
+                    return Values.create((boolean)value);
+                }
         ));
 
         nodePairs.add(new NodePair(
@@ -37,7 +42,14 @@ public class StandardCollection implements NodePairCollection {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.NUMBER)
                 }),
-                info -> Values.create((float) info.getInternals()[0].getValue())
+                info -> {
+                    try {
+                        return Values.create(Float.parseFloat(Container.JSON.writeValueAsString(info.getInternals()[0].getValue())));
+                    } catch (JsonProcessingException e) {
+                        RulesEngine.RULES_LOG.warning("Number node returned invalid value");
+                        return Values.create(0f);
+                    }
+                }
         ));
 
         nodePairs.add(new NodePair(
@@ -46,74 +58,153 @@ public class StandardCollection implements NodePairCollection {
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.STRING)
                 }),
-                info -> Values.create((String) info.getInternals()[0].getValue())
+                info -> {
+                    Object value = info.getInternals()[0].getValue();
+                    if (value == null) return Values.create("");
+                    if (!(value instanceof String)) return Values.create("");
+                    return Values.create((String)value);
+                }
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR, "Add", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR,"+", "Add", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.NUMBER),
                         new NodeSocket("b", NodeDataType.NUMBER),
                 }, new NodeSocket[]{
                         new NodeSocket("c", NodeDataType.NUMBER),
                 }),
                 info -> {
-                    NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
-                    NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
-                    return Values.create(a.getNumber() + b.getNumber());
+                    try {
+                        NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
+                        NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
+                        return Values.create(a.getNumber() + b.getNumber());
+                    } catch (Exception e) {
+                        return Values.create(0);
+                    }
                 }
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR, "And", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR,"-", "Subtract", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("a", NodeDataType.NUMBER),
+                        new NodeSocket("b", NodeDataType.NUMBER),
+                }, new NodeSocket[]{
+                        new NodeSocket("c", NodeDataType.NUMBER),
+                }),
+                info -> {
+                    try {
+                        NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
+                        NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
+                        return Values.create(a.getNumber() - b.getNumber());
+                    } catch (Exception e) {
+                        return Values.create(0);
+                    }
+                }
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR,"×", "Multiply", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("a", NodeDataType.NUMBER),
+                        new NodeSocket("b", NodeDataType.NUMBER),
+                }, new NodeSocket[]{
+                        new NodeSocket("c", NodeDataType.NUMBER),
+                }),
+                info -> {
+                    try {
+                        NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
+                        NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
+                        return Values.create(a.getNumber() * b.getNumber());
+                    } catch (Exception e) {
+                        return Values.create(0);
+                    }
+                }
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "&&", "And", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.BOOLEAN),
                         new NodeSocket("b", NodeDataType.BOOLEAN),
                 }, new NodeSocket[]{
                         new NodeSocket("c", NodeDataType.BOOLEAN),
                 }),
                 info -> {
-                    BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
-                    BooleanValue b = (BooleanValue) info.getValueFromInput(1, storage);
-                    return Values.create(a.getBoolean() && b.getBoolean());
+                    try {
+                        BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
+                        BooleanValue b = (BooleanValue) info.getValueFromInput(1, storage);
+                        return Values.create(a.getBoolean() && b.getBoolean());
+                    } catch (Exception e) {
+                        return Values.create(false);
+                    }
                 }
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR, "Or", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR,"||", "Or", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.BOOLEAN),
                         new NodeSocket("b", NodeDataType.BOOLEAN),
                 }, new NodeSocket[]{
                         new NodeSocket("c", NodeDataType.BOOLEAN),
                 }),
                 info -> {
-                    BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
-                    BooleanValue b = (BooleanValue) info.getValueFromInput(1, storage);
-                    return Values.create(a.getBoolean() || b.getBoolean());
+                    try {
+                        BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
+                        BooleanValue b = (BooleanValue) info.getValueFromInput(1, storage);
+                        return Values.create(a.getBoolean() || b.getBoolean());
+                    } catch (Exception e) {
+                        return Values.create(false);
+                    }
                 }
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR, "More than", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR, ">", "More than", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.NUMBER),
                         new NodeSocket("b", NodeDataType.NUMBER),
                 }, new NodeSocket[]{
                         new NodeSocket("c", NodeDataType.BOOLEAN),
                 }),
                 info -> {
-                    NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
-                    NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
-                    return Values.create(a.getNumber() > b.getNumber());
+                    try {
+                        NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
+                        NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
+                        return Values.create(a.getNumber() > b.getNumber());
+                    } catch (Exception e) {
+                        return Values.create(false);
+                    }
                 }
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR, "Not", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR, "<", "Less than", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("a", NodeDataType.NUMBER),
+                        new NodeSocket("b", NodeDataType.NUMBER),
+                }, new NodeSocket[]{
+                        new NodeSocket("c", NodeDataType.BOOLEAN),
+                }),
+                info -> {
+                    try {
+                        NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
+                        NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
+                        return Values.create(a.getNumber() < b.getNumber());
+                    } catch (Exception e) {
+                        return Values.create(false);
+                    }
+                }
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR,"!", "Not", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("i", NodeDataType.BOOLEAN),
                 }, new NodeSocket[]{
                         new NodeSocket("o", NodeDataType.BOOLEAN),
                 }),
                 info -> {
-                    BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
-                    return Values.create(!a.getBoolean());
+                    try {
+                        BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
+                        return Values.create(!a.getBoolean());
+                    } catch (Exception e) {
+                        return Values.create(true);
+                    }
                 }
         ));
 

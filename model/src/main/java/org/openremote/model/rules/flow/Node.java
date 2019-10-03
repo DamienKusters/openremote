@@ -9,6 +9,7 @@ public class Node {
     private NodeInternal[] internals;
     private NodeSocket[] inputs;
     private NodeSocket[] outputs;
+    private String displayCharacter;
 
     public Node(NodeType type, String name, NodeInternal[] internals, NodeSocket[] inputs, NodeSocket[] outputs) {
         this.id = "INVALID ID";
@@ -20,6 +21,23 @@ public class Node {
         this.internals = internals;
         this.inputs = inputs;
         this.outputs = outputs;
+        this.displayCharacter = null;
+    }
+
+    public Node(NodeType type, String displayCharacter,  String name, NodeInternal[] internals, NodeSocket[] inputs, NodeSocket[] outputs) {
+        if (internals.length != 0)
+            throw new IllegalArgumentException("A node cannot have internals when a display character is specified");
+
+        this.id = "INVALID ID";
+        this.position = new NodePosition(0, 0);
+
+        this.type = type;
+        this.name = name;
+        this.position = new NodePosition(0, 0);
+        this.internals = internals;
+        this.inputs = inputs;
+        this.outputs = outputs;
+        this.displayCharacter = displayCharacter;
     }
 
     public Node() {
@@ -30,6 +48,7 @@ public class Node {
         internals = new NodeInternal[]{};
         inputs = new NodeSocket[]{};
         outputs = new NodeSocket[]{};
+        displayCharacter = null;
     }
 
     public String getId() {
@@ -82,6 +101,14 @@ public class Node {
 
     public void setOutputs(NodeSocket[] outputs) {
         this.outputs = outputs;
+    }
+
+    public String getDisplayCharacter() {
+        return displayCharacter;
+    }
+
+    public void setDisplayCharacter(String displayCharacter) {
+        this.displayCharacter = displayCharacter;
     }
 }
 

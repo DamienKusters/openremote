@@ -46,7 +46,10 @@ public class RequiredCollection implements NodePairCollection {
                 info -> ((RulesBuilder.Action) facts -> {
                     info.setFacts(facts);
                     Object value = info.getValueFromInput(0, storageService);
-
+                    if (value == null) {
+                        RulesEngine.LOG.warning("Flow rule error: node " + info.getNode().getName() + " receives invalid value");
+                        return;
+                    }
                     AssetAttributeInternalValue assetAttributePair = Container.JSON.convertValue(info.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
 
                     try {
