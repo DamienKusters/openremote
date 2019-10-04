@@ -93,6 +93,11 @@ public class NodeExecutionRequestInfo {
         );
     }
 
+    public NodeDataType getTypeFromInput(int index) {
+        NodeSocket aSocket = getInputs()[index];
+        return aSocket.getType();
+    }
+
     public NodeCollection getCollection() {
         return collection;
     }

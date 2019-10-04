@@ -9,6 +9,7 @@ import org.openremote.manager.rules.flow.NodeStorageService;
 import org.openremote.model.rules.flow.*;
 import org.openremote.model.value.BooleanValue;
 import org.openremote.model.value.NumberValue;
+import org.openremote.model.value.StringValue;
 import org.openremote.model.value.Values;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class StandardCollection implements NodePairCollection {
                     Object value = info.getInternals()[0].getValue();
                     if (value == null) return Values.create(false);
                     if (!(value instanceof Boolean)) return Values.create(false);
-                    return Values.create((boolean)value);
+                    return Values.create((boolean) value);
                 }
         ));
 
@@ -62,12 +63,12 @@ public class StandardCollection implements NodePairCollection {
                     Object value = info.getInternals()[0].getValue();
                     if (value == null) return Values.create("");
                     if (!(value instanceof String)) return Values.create("");
-                    return Values.create((String)value);
+                    return Values.create((String) value);
                 }
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR,"+", "Add", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR, "+", "Add", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.NUMBER),
                         new NodeSocket("b", NodeDataType.NUMBER),
                 }, new NodeSocket[]{
@@ -85,7 +86,7 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR,"-", "Subtract", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR, "-", "Subtract", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.NUMBER),
                         new NodeSocket("b", NodeDataType.NUMBER),
                 }, new NodeSocket[]{
@@ -103,7 +104,25 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR,"×", "Multiply", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR, "Combine text", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("a", NodeDataType.STRING),
+                        new NodeSocket("b", NodeDataType.STRING),
+                }, new NodeSocket[]{
+                        new NodeSocket("c", NodeDataType.STRING),
+                }),
+                info -> {
+                    try {
+                        StringValue a = (StringValue) info.getValueFromInput(0, storage);
+                        StringValue b = (StringValue) info.getValueFromInput(1, storage);
+                        return Values.create(a.getString() + b.getString());
+                    } catch (Exception e) {
+                        return Values.create(0);
+                    }
+                }
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "×", "Multiply", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.NUMBER),
                         new NodeSocket("b", NodeDataType.NUMBER),
                 }, new NodeSocket[]{
@@ -139,7 +158,7 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR,"OR", "Or", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR, "OR", "Or", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.BOOLEAN),
                         new NodeSocket("b", NodeDataType.BOOLEAN),
                 }, new NodeSocket[]{
@@ -152,6 +171,22 @@ public class StandardCollection implements NodePairCollection {
                         return Values.create(a.getBoolean() || b.getBoolean());
                     } catch (Exception e) {
                         return Values.create(false);
+                    }
+                }
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "NOT", "Not", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("i", NodeDataType.BOOLEAN),
+                }, new NodeSocket[]{
+                        new NodeSocket("o", NodeDataType.BOOLEAN),
+                }),
+                info -> {
+                    try {
+                        BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
+                        return Values.create(!a.getBoolean());
+                    } catch (Exception e) {
+                        return Values.create(true);
                     }
                 }
         ));
@@ -193,17 +228,51 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR,"NOT", "Not", new NodeInternal[0], new NodeSocket[]{
-                        new NodeSocket("i", NodeDataType.BOOLEAN),
+                new Node(NodeType.PROCESSOR, "Number switch", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("if", NodeDataType.BOOLEAN),
+                        new NodeSocket("then", NodeDataType.NUMBER),
+                        new NodeSocket("else", NodeDataType.NUMBER),
                 }, new NodeSocket[]{
-                        new NodeSocket("o", NodeDataType.BOOLEAN),
+                        new NodeSocket("output", NodeDataType.NUMBER),
                 }),
                 info -> {
                     try {
-                        BooleanValue a = (BooleanValue) info.getValueFromInput(0, storage);
-                        return Values.create(!a.getBoolean());
+                        BooleanValue condition;
+                        try {
+                            condition = (BooleanValue) info.getValueFromInput(0, storage);
+                        } catch (Exception e) {
+                            condition = Values.create(false);
+                        }
+                        NumberValue then = (NumberValue) info.getValueFromInput(1, storage);
+                        NumberValue _else = (NumberValue) info.getValueFromInput(2, storage);
+                        return Values.create(condition.getBoolean() ? then.getNumber() : _else.getNumber());
                     } catch (Exception e) {
-                        return Values.create(true);
+                        return Values.create(0);
+                    }
+                }
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "Text switch", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("if", NodeDataType.BOOLEAN),
+                        new NodeSocket("then", NodeDataType.STRING),
+                        new NodeSocket("else", NodeDataType.STRING),
+                }, new NodeSocket[]{
+                        new NodeSocket("output", NodeDataType.STRING),
+                }),
+                info -> {
+                    try {
+                        BooleanValue condition;
+                        try {
+                            condition = (BooleanValue) info.getValueFromInput(0, storage);
+                        } catch (Exception e) {
+                            condition = Values.create(false);
+                        }
+                        StringValue then = (StringValue) info.getValueFromInput(1, storage);
+                        StringValue _else = (StringValue) info.getValueFromInput(2, storage);
+                        return Values.create(condition.getBoolean() ? then.getString() : _else.getString());
+                    } catch (Exception e) {
+                        return Values.create(0);
                     }
                 }
         ));
