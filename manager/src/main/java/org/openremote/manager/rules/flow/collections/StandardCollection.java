@@ -105,7 +105,7 @@ public class StandardCollection implements NodePairCollection {
 
         nodePairs.add(new NodePair(
                 new Node(NodeType.PROCESSOR, "Combine text", new NodeInternal[]{
-                        new NodeInternal("Joiner", new Picker("Joiner", PickerType.TEXT))
+                        new NodeInternal("joiner", new Picker("joiner", PickerType.TEXT))
                 }, new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.STRING),
                         new NodeSocket("b", NodeDataType.STRING),
@@ -115,10 +115,19 @@ public class StandardCollection implements NodePairCollection {
                 info -> {
                     try {
                         Object rJoiner = info.getInternals()[0].getValue();
+                        Object rA = info.getValueFromInput(0, storage);
+                        Object rB = info.getValueFromInput(1, storage);
+                        StringValue a, b;
 
-                        StringValue a = (StringValue) info.getValueFromInput(0, storage);
+                        if (rA instanceof StringValue)
+                            a = (StringValue) rA;
+                        else a = Values.create(rA.toString());
+
+                        if (rB instanceof StringValue)
+                            b = (StringValue) rB;
+                        else b = Values.create(rB.toString());
+
                         String joiner = rJoiner == null ? "" : (String) rJoiner;
-                        StringValue b = (StringValue) info.getValueFromInput(1, storage);
                         return Values.create(a.getString() + joiner + b.getString());
                     } catch (Exception e) {
                         return Values.create(0);
