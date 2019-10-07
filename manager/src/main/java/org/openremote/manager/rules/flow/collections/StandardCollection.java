@@ -104,7 +104,9 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
-                new Node(NodeType.PROCESSOR, "Combine text", new NodeInternal[0], new NodeSocket[]{
+                new Node(NodeType.PROCESSOR, "Combine text", new NodeInternal[]{
+                        new NodeInternal("Joiner", new Picker("Joiner", PickerType.TEXT))
+                }, new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.STRING),
                         new NodeSocket("b", NodeDataType.STRING),
                 }, new NodeSocket[]{
@@ -112,9 +114,12 @@ public class StandardCollection implements NodePairCollection {
                 }),
                 info -> {
                     try {
+                        Object rJoiner = info.getInternals()[0].getValue();
+
                         StringValue a = (StringValue) info.getValueFromInput(0, storage);
+                        String joiner = rJoiner == null ? "" : (String) rJoiner;
                         StringValue b = (StringValue) info.getValueFromInput(1, storage);
-                        return Values.create(a.getString() + b.getString());
+                        return Values.create(a.getString() + joiner + b.getString());
                     } catch (Exception e) {
                         return Values.create(0);
                     }
@@ -133,6 +138,28 @@ public class StandardCollection implements NodePairCollection {
                         NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
                         NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
                         return Values.create(a.getNumber() * b.getNumber());
+                    } catch (Exception e) {
+                        return Values.create(0);
+                    }
+                }
+        ));
+
+        nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "÷", "Divide", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("a", NodeDataType.NUMBER),
+                        new NodeSocket("b", NodeDataType.NUMBER),
+                }, new NodeSocket[]{
+                        new NodeSocket("c", NodeDataType.NUMBER),
+                }),
+                info -> {
+                    try {
+                        NumberValue a = (NumberValue) info.getValueFromInput(0, storage);
+                        NumberValue b = (NumberValue) info.getValueFromInput(1, storage);
+
+                        if (b.getNumber() == 0)
+                            return Values.create(0f);
+
+                        return Values.create(a.getNumber() / b.getNumber());
                     } catch (Exception e) {
                         return Values.create(0);
                     }

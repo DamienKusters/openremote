@@ -1,7 +1,6 @@
 package org.openremote.manager.rules.flow;
 
-import org.openremote.manager.rules.flow.NodeExecutionRequestInfo;
-
 public interface NodeImplementation {
     Object execute(NodeExecutionRequestInfo info);
 }
+
