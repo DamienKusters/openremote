@@ -100,6 +100,7 @@ public class RulesetDeployment {
     final protected List<ScheduledFuture> scheduledRuleActions = new ArrayList<>();
     protected RulesetStatus status;
     protected Throwable error;
+    protected FlowRulesBuilder flowRulesBuilder;
     protected JsonRulesBuilder jsonRulesBuilder;
     protected JsonRulesetDefinition jsonRulesetDefinition;
     public RulesetDeployment(Ruleset ruleset, TimerService timerService, AssetStorageService assetStorageService, ManagerExecutorService executorService, NodeStorageService nodeStorageService, Assets assetsFacade, Users usersFacade, NotificationsFacade notificationsFacade) {
@@ -112,17 +113,23 @@ public class RulesetDeployment {
         this.usersFacade = usersFacade;
         this.notificationsFacade = notificationsFacade;
 
-        if (ruleset.getLang() == Ruleset.Lang.JSON) {
-            try {
-                String rulesStr = ruleset.getRules();
-                rulesStr = rulesStr.replace("%RULESET_ID%", Long.toString(ruleset.getId()));
-                rulesStr = rulesStr.replace("%RULESET_NAME%", ruleset.getName());
-                jsonRulesetDefinition = Container.JSON.readValue(rulesStr, JsonRulesetDefinition.class);
-                jsonRulesBuilder = new JsonRulesBuilder(timerService, assetStorageService, executorService, assetsFacade, usersFacade, notificationsFacade, this::scheduleRuleAction);
-            } catch (IOException e) {
-                RulesEngine.LOG.log(Level.SEVERE, "Error evaluating ruleset: " + ruleset, e);
-                setError(e);
-            }
+        switch (ruleset.getLang())
+        {
+            case JSON:
+                try {
+                    String rulesStr = ruleset.getRules();
+                    rulesStr = rulesStr.replace("%RULESET_ID%", Long.toString(ruleset.getId()));
+                    rulesStr = rulesStr.replace("%RULESET_NAME%", ruleset.getName());
+                    jsonRulesetDefinition = Container.JSON.readValue(rulesStr, JsonRulesetDefinition.class);
+                    jsonRulesBuilder = new JsonRulesBuilder(timerService, assetStorageService, executorService, assetsFacade, usersFacade, notificationsFacade, this::scheduleRuleAction);
+                } catch (IOException e) {
+                    RulesEngine.LOG.log(Level.SEVERE, "Error evaluating ruleset: " + ruleset, e);
+                    setError(e);
+                }
+                break;
+            case FLOW:
+                flowRulesBuilder = new FlowRulesBuilder(nodeStorageService, timerService, assetStorageService, executorService, assetsFacade, usersFacade, notificationsFacade, this::scheduleRuleAction);
+                break;
         }
     }
 
@@ -408,15 +415,8 @@ public class RulesetDeployment {
     protected boolean startRulesFlow(Ruleset ruleset, Assets assetsFacade, Users usersFacade, NotificationsFacade consolesFacade) {
         try {
             NodeCollection nodeCollection = Container.JSON.readValue(ruleset.getRules(), NodeCollection.class);
-
-            FlowRulesBuilder rulesBuilder = new FlowRulesBuilder();
-            rulesBuilder.setAssets(assetsFacade);
-            rulesBuilder.setUsers(usersFacade);
-            rulesBuilder.setNotification(consolesFacade);
-            rulesBuilder.setNodeStorageService(nodeStorageService);
-
-            rulesBuilder.add(nodeCollection);
-            for (Rule rule : rulesBuilder.build()) {
+            flowRulesBuilder.add(nodeCollection);
+            for (Rule rule : flowRulesBuilder.build()) {
                 RulesEngine.LOG.info("Registering rule: " + rule.getName());
                 rules.register(rule);
             }

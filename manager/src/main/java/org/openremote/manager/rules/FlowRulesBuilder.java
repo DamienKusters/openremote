@@ -3,31 +3,38 @@ package org.openremote.manager.rules;
 import org.jeasy.rules.api.Rule;
 import org.jeasy.rules.core.RuleBuilder;
 import org.openremote.container.Container;
+import org.openremote.container.timer.TimerService;
+import org.openremote.manager.asset.AssetStorageService;
+import org.openremote.manager.concurrent.ManagerExecutorService;
+import org.openremote.manager.rules.facade.NotificationsFacade;
 import org.openremote.manager.rules.flow.NodeExecutionRequestInfo;
 import org.openremote.manager.rules.flow.NodeStorageService;
 import org.openremote.model.query.AssetQuery;
 import org.openremote.model.rules.AssetState;
 import org.openremote.model.rules.Assets;
-import org.openremote.model.rules.Notifications;
 import org.openremote.model.rules.Users;
 import org.openremote.model.rules.flow.*;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class FlowRulesBuilder extends RulesBuilder {
+public class FlowRulesBuilder extends JsonRulesBuilder {
     private Map<Action, Long> lastRanMap = new LinkedHashMap<>();
 
     private List<NodeCollection> nodeCollections = new ArrayList<>();
     private NodeStorageService nodeStorageService;
-    private Notifications notification;
-    private Users users;
-    private Assets assets;
+
+    public FlowRulesBuilder(NodeStorageService nodeStorageService, TimerService timerService, AssetStorageService assetStorageService, ManagerExecutorService executorService, Assets assetsFacade, Users usersFacade, NotificationsFacade notificationFacade, BiConsumer<Runnable, Long> scheduledActionConsumer) {
+        super(timerService, assetStorageService, executorService, assetsFacade, usersFacade, notificationFacade, scheduledActionConsumer);
+        this.nodeStorageService = nodeStorageService;
+    }
 
     public void add(NodeCollection nodeCollection) {
         nodeCollections.add(nodeCollection);
     }
 
+    @Override
     public Rule[] build() {
 
         if (nodeStorageService == null)
@@ -50,7 +57,7 @@ public class FlowRulesBuilder extends RulesBuilder {
     }
 
     private Rule createRule(String name, NodeCollection collection, Node outputNode) throws Exception {
-        Object implementationResult = nodeStorageService.getImplementationFor(outputNode.getName()).execute(new NodeExecutionRequestInfo(collection, outputNode, null, null, assets, users, notification));
+        Object implementationResult = nodeStorageService.getImplementationFor(outputNode.getName()).execute(new NodeExecutionRequestInfo(collection, outputNode, null, null, assetsFacade, usersFacade, notificationFacade));
 
         if (implementationResult == null)
             throw new NullPointerException(outputNode.getName() + " node returns null");
@@ -104,6 +111,15 @@ public class FlowRulesBuilder extends RulesBuilder {
                 build();
     }
 
+    private List<List<Node>> findAllExecutableNodeTrees(NodeCollection collection) {
+        List<List<Node>> nodes = new ArrayList<>();
+        for (Node node : collection.getNodes()) {
+            if (node.getType() != NodeType.OUTPUT) continue;
+            nodes.add(backtrackFrom(collection, node));
+        }
+        return nodes;
+    }
+
     private List<Node> backtrackFrom(NodeCollection collection, Node node) {
         List<Node> total = new ArrayList<>();
         List<Node> children = new ArrayList<>();
@@ -118,37 +134,5 @@ public class FlowRulesBuilder extends RulesBuilder {
         }
 
         return total;
-    }
-
-    public NodeStorageService getNodeStorageService() {
-        return nodeStorageService;
-    }
-
-    public void setNodeStorageService(NodeStorageService nodeStorageService) {
-        this.nodeStorageService = nodeStorageService;
-    }
-
-    public Notifications getNotification() {
-        return notification;
-    }
-
-    public void setNotification(Notifications notification) {
-        this.notification = notification;
-    }
-
-    public Users getUsers() {
-        return users;
-    }
-
-    public void setUsers(Users users) {
-        this.users = users;
-    }
-
-    public Assets getAssets() {
-        return assets;
-    }
-
-    public void setAssets(Assets assets) {
-        this.assets = assets;
     }
 }
