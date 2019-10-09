@@ -120,6 +120,19 @@ public class FlowRulesBuilder extends JsonRulesBuilder {
         return nodes;
     }
 
+    private AssetQuery getRelevantAssets(Node outputNode, NodeCollection collection) {
+        List<Node> connectedTree = backtrackFrom(collection, outputNode);
+        List<String> assetIds = new ArrayList<>();
+        //TODO: should there be hardcoded (always available no matter the user configuration) asset (read, write) nodes?
+        connectedTree.stream().filter(c -> c.getName().equals("Read attribute")).forEach(c -> {
+            AssetAttributeInternalValue internal = Container.JSON.convertValue(c.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
+            String assetId = internal.getAssetId();
+            assetIds.add(assetId);
+        });
+
+        return new AssetQuery().select(AssetQuery.Select.selectAll()).ids(assetIds.toArray(new String[0]));
+    }
+
     private List<Node> backtrackFrom(NodeCollection collection, Node node) {
         List<Node> total = new ArrayList<>();
         List<Node> children = new ArrayList<>();

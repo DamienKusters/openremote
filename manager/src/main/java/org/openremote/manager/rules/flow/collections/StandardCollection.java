@@ -176,6 +176,24 @@ public class StandardCollection implements NodePairCollection {
         ));
 
         nodePairs.add(new NodePair(
+                new Node(NodeType.PROCESSOR, "=", "Equals", new NodeInternal[0], new NodeSocket[]{
+                        new NodeSocket("a", NodeDataType.ANY),
+                        new NodeSocket("b", NodeDataType.ANY),
+                }, new NodeSocket[]{
+                        new NodeSocket("c", NodeDataType.BOOLEAN),
+                }),
+                info -> {
+                    try {
+                        Object a = info.getValueFromInput(0, storage);
+                        Object b = info.getValueFromInput(1, storage);
+                        return Values.create(a.equals(b));
+                    } catch (Exception e) {
+                        return Values.create(false);
+                    }
+                }
+        ));
+
+        nodePairs.add(new NodePair(
                 new Node(NodeType.PROCESSOR, "AND", "And", new NodeInternal[0], new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.BOOLEAN),
                         new NodeSocket("b", NodeDataType.BOOLEAN),
