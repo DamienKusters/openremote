@@ -51,6 +51,11 @@ public class RequiredCollection implements NodePairCollection {
                         return;
                     }
                     AssetAttributeInternalValue assetAttributePair = Container.JSON.convertValue(info.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
+                    Optional<AssetState> existingValue = info.getFacts().matchFirstAssetState(new AssetQuery().select(AssetQuery.Select.selectAll()).ids(assetAttributePair.getAssetId()).attributeName(assetAttributePair.getAttributeName()));
+                    
+                    if (existingValue.isPresent())
+                        if (existingValue.get().getValue().isPresent())
+                            if (existingValue.get().getValue().get().equals(value)) return;
 
                     try {
                         if (value instanceof Value) {

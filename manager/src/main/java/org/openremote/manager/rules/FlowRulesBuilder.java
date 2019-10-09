@@ -20,8 +20,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class FlowRulesBuilder extends JsonRulesBuilder {
-    private Map<Action, Long> lastRanMap = new LinkedHashMap<>();
-
+    private Map<String, Long> triggerMap = new LinkedHashMap<>();
     private List<NodeCollection> nodeCollections = new ArrayList<>();
     private NodeStorageService nodeStorageService;
 
@@ -82,11 +81,13 @@ public class FlowRulesBuilder extends JsonRulesBuilder {
 
                 return allAssets.stream().anyMatch(state -> {
                     long timestamp = state.getTimestamp();
-                    RulesEngine.RULES_LOG.info("Firing rule when " + timestamp + " is more than " + lastRanMap.get(action));
-                    return timestamp > lastRanMap.getOrDefault(action, -1L);
+                    RulesEngine.RULES_LOG.info("Firing rule when " + timestamp + " is more than " + triggerMap.get(name));
+                    return timestamp > triggerMap.getOrDefault(name, -1L) && state.isValueChanged();
                 });
             });
         };
+
+        triggerMap.put(name, -1L);
 
         return new RuleBuilder().
                 name(name).
@@ -106,7 +107,7 @@ public class FlowRulesBuilder extends JsonRulesBuilder {
                 }).
                 then(facts -> {
                     action.execute((RulesFacts) facts);
-                    lastRanMap.put(action, ((RulesFacts) facts).timerService.getCurrentTimeMillis());
+                    triggerMap.put(name, timerService.getCurrentTimeMillis());
                 }).
                 build();
     }
@@ -120,7 +121,7 @@ public class FlowRulesBuilder extends JsonRulesBuilder {
         return nodes;
     }
 
-    private AssetQuery getRelevantAssets(Node outputNode, NodeCollection collection) {
+    private AssetQuery getRelevantAssetQuery(Node outputNode, NodeCollection collection) {
         List<Node> connectedTree = backtrackFrom(collection, outputNode);
         List<String> assetIds = new ArrayList<>();
         //TODO: should there be hardcoded (always available no matter the user configuration) asset (read, write) nodes?
@@ -147,5 +148,22 @@ public class FlowRulesBuilder extends JsonRulesBuilder {
         }
 
         return total;
+    }
+
+    private static class FlowTrigger {
+        public Long timestamp;
+        public Object value;
+
+        public FlowTrigger(Long timestamp, Object value) {
+            this.timestamp = timestamp;
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object a) {
+            if (!(a instanceof FlowTrigger)) return false;
+            FlowTrigger other = (FlowTrigger) a;
+            return other.timestamp.equals(timestamp) && other.value.equals(value);
+        }
     }
 }
