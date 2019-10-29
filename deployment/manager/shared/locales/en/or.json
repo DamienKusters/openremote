@@ -70,6 +70,14 @@
   "name": "Name",
   "deleteAssetsNoChildrenAllowed": "Only assets that have no descendants can be deleted, please remove descendents first.",
   "confirmDeleteAssets": "Remove assets?",
-  "ok": "ok",
-  "cancel": "cancel"
+  "ok": "OK",
+  "cancel": "Cancel",
+  "createdOn": "Created on",
+  "accessPublicRead": "Public read",
+  "type": "Type",
+  "path": "Path",
+  "showOnMap": "Show on map",
+  "noAssetSelected": "Please select an asset on the left",
+  "loading": "Loading...",
+  "location": "Location"
 }

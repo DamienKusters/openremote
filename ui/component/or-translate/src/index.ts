@@ -2,12 +2,16 @@ import {translate} from "./translate-mixin";
 import i18next from "i18next";
 import {LitElement, customElement, property, html, css} from "lit-element";
 
+export {i18next};
+
+export {translate};
+
 @customElement("or-translate")
 export class OrTranslate extends translate(i18next)(LitElement) {
 
     public static styles = css`
         :host {
-            display: inline-block;
+            display: inline;
         }
         
         :host([hidden]) {

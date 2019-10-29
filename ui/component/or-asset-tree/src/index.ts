@@ -1,13 +1,11 @@
-import {customElement, html, LitElement, property, PropertyValues, TemplateResult, query} from "lit-element";
-import "@openremote/or-select";
+import {customElement, html, LitElement, property, PropertyValues, query, TemplateResult} from "lit-element";
+import "@openremote/or-input";
 import "@openremote/or-icon";
-import {TenantRuleset, Asset, AssetQuery, Tenant, AssetTreeNode, AssetType} from "@openremote/model";
+import {Asset, AssetQuery, AssetTreeNode, AssetType, Tenant} from "@openremote/model";
 import "@openremote/or-translate";
 import {style} from "./style";
-import openremote, {AssetModelUtil} from "@openremote/core";
-import rest from "@openremote/rest";
-import {OrSelectChangedEvent} from "@openremote/or-select";
-import "@openremote/or-icon";
+import manager, {AssetModelUtil, OREvent, EventCallback} from "@openremote/core";
+import {OrInputChangedEvent, InputType} from "@openremote/or-input";
 import Qs from "qs";
 
 export interface UiAssetTreeNode extends AssetTreeNode {
@@ -179,17 +177,31 @@ export class OrAssetTree extends LitElement {
     @query("#delete-confirm-modal")
     protected _deleteConfirmModal!: HTMLDivElement;
 
-    connectedCallback() {
-        super.connectedCallback();
+    protected _initCallback?: EventCallback;
+    protected _ready = false;
 
-        if (openremote.isSuperUser()) {
-            rest.api.TenantResource.getAll().then((response) => {
-                this._realms = response.data;
-            });
-        }
+    protected _onReady() {
+        this._ready = true;
+        this._loadRealms();
+        this._loadAssets();
     }
 
     protected firstUpdated(_changedProperties: PropertyValues): void {
+        super.firstUpdated(_changedProperties);
+
+        if (!manager.ready) {
+            // Defer until openremote is initialised
+            this._initCallback = (initEvent: OREvent) => {
+                if (initEvent === OREvent.READY) {
+                    this._onReady();
+                    manager.removeListener(this._initCallback!);
+                }
+            };
+            manager.addListener(this._initCallback);
+        } else {
+            this._onReady();
+        }
+
         this.addEventListener("click", (evt) => {
             if (this._sortMenu.hasAttribute("data-visible") && !this._sortMenu.contains(evt.target as Node)) {
                 this._sortMenu.toggleAttribute("data-visible");
@@ -209,7 +221,7 @@ export class OrAssetTree extends LitElement {
             <div id="header">
                 <div id="title-container">
                     <or-translate id="title" value="asset_plural"></or-translate>
-                    ${openremote.isSuperUser() ? html `<or-select id="realm-picker" noempty .value="${this._getRealm()}" .options="${this._realms ? this._realms.map((tenant) => [tenant.realm, tenant.displayName]) : []}" @or-select-changed="${(evt: OrSelectChangedEvent) => this._onRealmChanged(evt)}"></or-select>` : ``}
+                    ${manager.isSuperUser() ? html `<or-input id="realm-picker" type="${InputType.SELECT}" .value="${this._getRealm()}" .options="${this._realms ? this._realms.map((tenant) => [tenant.realm, tenant.displayName]) : []}" @or-input-changed="${(evt: OrInputChangedEvent) => this._onRealmChanged(evt)}"></or-input>` : ``}
                 </div>
 
                 <div id="header-btns">
@@ -322,6 +334,14 @@ export class OrAssetTree extends LitElement {
         return result;
     }
 
+    protected _loadRealms() {
+        if (manager.isSuperUser()) {
+            manager.rest.api.TenantResource.getAll().then((response) => {
+                this._realms = response.data;
+            });
+        }
+    }
+
     public get selectedNodes(): UiAssetTreeNode[] {
         return this._selectedNodes ? [...this._selectedNodes] : [];
     }
@@ -347,6 +367,7 @@ export class OrAssetTree extends LitElement {
 
         this.selectedIds = actuallySelectedIds;
         this._selectedNodes = selectedNodes;
+        this.dispatchEvent(new OrAssetTreeSelectionChangedEvent(this._selectedNodes));
     }
 
 
@@ -429,7 +450,7 @@ export class OrAssetTree extends LitElement {
         let deselectOthers = true;
 
         if (this.multiSelect) {
-            if (evt.ctrlKey) {
+            if (evt.ctrlKey || evt.metaKey) {
                 deselectOthers = false;
                 if (index >= 0 && selectedIds.length > 1) {
                     select = false;
@@ -480,7 +501,7 @@ export class OrAssetTree extends LitElement {
             return;
         }
 
-        rest.api.AssetResource.delete({
+        manager.rest.api.AssetResource.delete({
             assetId: this._selectedNodes.map((node) => node.asset!.id!)
         }, {
             paramsSerializer: params => Qs.stringify(params, {arrayFormat: 'repeat'})
@@ -525,6 +546,10 @@ export class OrAssetTree extends LitElement {
 
     protected _loadAssets() {
 
+        if (!this._ready) {
+            return;
+        }
+
         const sortFunction = this._getSortFunction();
 
         if (!this.assets) {
@@ -551,7 +576,7 @@ export class OrAssetTree extends LitElement {
                 query.recursive = true;
             }
 
-            rest.api.AssetResource.queryAssets(query).then((response) => {
+            manager.rest.api.AssetResource.queryAssets(query).then((response) => {
                 this._buildTreeNodes(response.data, sortFunction);
             });
         } else {
@@ -613,14 +638,14 @@ export class OrAssetTree extends LitElement {
     }
 
     protected _getRealm(): string | undefined {
-        if (openremote.isSuperUser() && this.realm) {
+        if (manager.isSuperUser() && this.realm) {
             return this.realm;
         }
 
-        return openremote.getRealm();
+        return manager.getRealm();
     }
 
-    protected _onRealmChanged(evt: OrSelectChangedEvent) {
+    protected _onRealmChanged(evt: OrInputChangedEvent) {
         this.realm = evt.detail.value;
         this.assets = undefined;
     }

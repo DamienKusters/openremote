@@ -1,9 +1,6 @@
 import {ConsoleRegistration} from "@openremote/model";
-import rest from "@openremote/rest";
-import openremote from "./index";
+import manager from "./index";
 import {AxiosResponse} from "axios";
-
-declare function require(name: string): any;
 
 // No ES6 module support in platform lib
 let platform = require('platform');
@@ -106,7 +103,7 @@ export class Console {
             consoleReg.providers[providerName] = provider;
         }
 
-        let appName = openremote.getAppName();
+        let appName = manager.getAppName();
         if (appName.length > 0 && consoleReg.apps!.indexOf(appName) < 0) {
             consoleReg.apps!.push(appName);
         }
@@ -305,7 +302,7 @@ export class Console {
                 console.debug("Console: updating registration");
 
                 try {
-                    rest.api.ConsoleResource.register(this._registration).then((response: AxiosResponse<ConsoleRegistration>) => {
+                    manager.rest.api.ConsoleResource.register(this._registration).then((response: AxiosResponse<ConsoleRegistration>) => {
                         if (response.status !== 200) {
                             throw new Error("Failed to register console");
                         }
@@ -341,7 +338,7 @@ export class Console {
             key: key
         }, true);
 
-        if (response && response.hasOwnProperty("value")) {
+        if (response && response.value) {
             return JSON.parse(response.value);
         }
 
@@ -431,7 +428,7 @@ export class Console {
                                 throw new Error("Storage provider 'store' action requires a `key`");
                             }
 
-                            if (msg.hasOwnProperty("value")) {
+                            if (msg.value) {
                                 if (msg.value === null) {
                                     window.localStorage.removeItem(keyValue);
                                 } else {

@@ -3,7 +3,7 @@
 #
 # Run this in the background for full ./gradlew clean build
 #
-version: '2.2'
+version: '2.4'
 
 volumes:
   postgresql-data:
@@ -14,15 +14,11 @@ services:
     extends:
       file: deploy.yml
       service: keycloak
+    volumes:
+      - ../ui/keycloak/themes:/deployment/keycloak/themes
     # Access directly if needed on localhost
     ports:
       - "8081:8080"
-    build:
-      context: ../keycloak
-      dockerfile: dev.Dockerfile
-    image: openremote/keycloak_dev:${DATE_TAG:-latest}
-    volumes:
-      - ../ui/keycloak/themes/openremote:/opt/jboss/keycloak/themes/openremote
     depends_on:
       postgresql:
         condition: service_healthy

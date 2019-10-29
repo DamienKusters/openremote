@@ -1,5 +1,5 @@
 import {css, unsafeCSS} from "lit-element";
-import {DefaultColor1, DefaultColor2, DefaultColor5, DefaultColor3, DefaultBoxShadow, DefaultColor4, DefaultColor6, DefaultColor7, DefaultDisabledOpacity} from "@openremote/core";
+import {DefaultColor1, DefaultColor2, DefaultColor5, DefaultColor3, DefaultBoxShadow, DefaultColor4, DefaultColor6, DefaultDisabledOpacity} from "@openremote/core";
 
 // language=CSS
 export const rulesEditorStyle = css`
@@ -13,7 +13,7 @@ export const rulesEditorStyle = css`
         --internal-or-rules-editor-text-color: var(--or-rules-editor-text-color, inherit);
         --internal-or-rules-editor-button-color: var(--or-rules-editor-button-color, var(--or-app-color4, ${unsafeCSS(DefaultColor4)}));
         --internal-or-rules-editor-invalid-color: var(--or-rules-editor-invalid-color, var(--or-app-color6, ${unsafeCSS(DefaultColor6)}));        
-        --internal-or-rules-editor-panel-color: var(--or-rules-editor-panel-color, var(--or-app-color7, ${unsafeCSS(DefaultColor7)}));
+        --internal-or-rules-editor-panel-color: var(--or-rules-editor-panel-color, var(--or-app-color1, ${unsafeCSS(DefaultColor1)}));
         --internal-or-rules-editor-line-color: var(--or-rules-editor-line-color, var(--or-app-color5, ${unsafeCSS(DefaultColor5)}));
         
         --internal-or-rules-editor-list-selected-color: var(--or-rules-editor-list-selected-color, var(--or-app-color2, ${unsafeCSS(DefaultColor2)}));
@@ -142,12 +142,19 @@ export const buttonStyle = css`
         display: flex;
         flex-direction: column;
         margin-top: 10px;
+        margin-bottom: -10px;
         padding-top: 5px;
         border-top-width: 1px;
         border-top-style: solid;
         border-color: var(--internal-or-rules-editor-line-color);
     }
 
+    .add-buttons-container.hidden {
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
+    
     .add-buttons-container > button {
         display: inline-flex;
     }
@@ -377,7 +384,7 @@ export const whenStyle = css`
     }
 
     .rule-group.visible {
-        padding: 20px 20px 10px 20px;
+        padding: 20px;
         border-width: 2px;
         border-style: solid;
         border-color: var(--internal-or-rules-editor-line-color);    
@@ -487,6 +494,10 @@ export const conditionEditorStyle = css`
     or-rule-asset-query {
         flex-grow: 1;
     }
+
+    #type-selector {
+        margin-top: 10px;
+    }
 `;
 
 // language=CSS
@@ -525,8 +536,9 @@ export const assetQueryEditorStyle = css`
         padding-left: 40px;
     }
     
-    .attribute {
+    .attribute, .attribute-editor {
         display: flex;
+        flex-grow: 1;
     }
 
     .operator {
@@ -548,11 +560,7 @@ export const assetQueryEditorStyle = css`
     .attribute > * {
         flex-grow: 0;
     }
-    
-    .attribute > .attribute-editor {
-        flex-grow: 1;
-    }
-    
+
     .attribute-items div:last-child > .operator {
         display: none;
     }

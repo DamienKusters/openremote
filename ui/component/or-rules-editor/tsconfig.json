@@ -10,9 +10,9 @@
   ],
   "references": [
     { "path": "../core" },
-    { "path": "../or-select" },
     { "path": "../or-translate" },
     { "path": "../or-input" },
+    { "path": "../or-attribute-input" },
     { "path": "../rest" }
   ]
 }

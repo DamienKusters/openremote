@@ -7,11 +7,11 @@ import {
     RuleCondition,
     LogicGroup,
     Asset,
-    AssetAttribute,
+    Attribute,
     AttributeEvent,
-    MetaItem
+    MetaItem,
+    AssetAttribute
 } from "@openremote/model";
-import {Util} from "./index";
 
 export class Deferred<T> {
 
@@ -208,19 +208,29 @@ export function getAssetAttribute(asset: Asset, attributeName: string): AssetAtt
     if (asset.attributes && asset.attributes.hasOwnProperty(attributeName)) {
         const attr = asset.attributes[attributeName] as AssetAttribute;
         attr.name = attributeName;
+        attr.assetId = asset.id;
         return attr;
     }
 }
 
-export function getAssetAttributes(asset: Asset): AssetAttribute[] {
+export function getAssetAttributes(asset: Asset, exclude?: string[]): AssetAttribute[] {
     if (asset.attributes) {
-        return Object.entries(asset.attributes as {[s: string]: AssetAttribute}).map(([name, attr]) => {
+        return Object.entries(asset.attributes as {[s: string]: AssetAttribute}).filter(([name, attr]) => !exclude || exclude.indexOf(name) >= 0).map(([name, attr]) => {
             attr.name = name;
+            attr.assetId = asset.id;
             return attr;
         });
     }
 
     return [];
+}
+
+export function getFirstMetaItem(attribute: Attribute | undefined, name: string): MetaItem | undefined {
+    if (!attribute || !attribute.meta) {
+        return;
+    }
+
+    return attribute.meta.find((metaItem) => metaItem.name === name);
 }
 
 /**
@@ -244,3 +254,14 @@ export function updateAsset(asset: Asset, event: AttributeEvent): Asset {
 
     return Object.assign({}, asset);
 }
+
+export function loadJs(url: string) {
+        return new Promise((resolve, reject) => {
+            let script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = url;
+            script.addEventListener('load', () => resolve(script), false);
+            script.addEventListener('error', () => reject(script), false);
+            document.body.appendChild(script);
+        });
+};

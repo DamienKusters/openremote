@@ -69,6 +69,7 @@ import static org.openremote.container.util.MapAccess.getString;
 import static org.openremote.model.AbstractValueTimestampHolder.VALUE_TIMESTAMP_FIELD_NAME;
 import static org.openremote.model.asset.AssetAttribute.attributesFromJson;
 import static org.openremote.model.asset.AssetAttribute.getAddedOrModifiedAttributes;
+import static org.openremote.model.query.AssetQuery.Select.selectExcludePathAndAttributes;
 
 /**
  * Manages {@link RulesEngine}s for stored {@link Ruleset}s and processes asset attribute updates.
@@ -415,8 +416,7 @@ public class RulesService extends RouteBuilder implements ContainerService, Asse
 
                     // Retract facts for attributes that are obsolete
                     getAddedOrModifiedAttributes(newRuleStateAttributes,
-                        oldRuleStateAttributes,
-                        key -> key.equals(VALUE_TIMESTAMP_FIELD_NAME))
+                        oldRuleStateAttributes)
                         .forEach(obsoleteFactAttribute -> {
                             AssetState update = buildAssetState.apply(loadedAsset, obsoleteFactAttribute);
                             LOG.fine("Asset was persisted (" + persistenceEvent.getCause() + "), retracting: " + update);
@@ -425,8 +425,7 @@ public class RulesService extends RouteBuilder implements ContainerService, Asse
 
                     // Insert facts for attributes that are new
                     getAddedOrModifiedAttributes(oldRuleStateAttributes,
-                        newRuleStateAttributes,
-                        key -> key.equals(VALUE_TIMESTAMP_FIELD_NAME))
+                        newRuleStateAttributes)
                         .forEach(newFactAttribute -> {
                             AssetState assetState = buildAssetState.apply(loadedAsset, newFactAttribute);
                             LOG.fine("Asset was persisted (" + persistenceEvent.getCause() + "), updating: " + assetState);
@@ -760,7 +759,6 @@ public class RulesService extends RouteBuilder implements ContainerService, Asse
     protected Stream<Pair<Asset, Stream<AssetAttribute>>> findRuleStateAttributes() {
         List<Asset> assets = assetStorageService.findAll(
             new AssetQuery()
-                .select(AssetQuery.Select.selectAll())
                 .attributeMeta(
                     new AttributeMetaPredicate(
                         MetaItemType.RULE_STATE,

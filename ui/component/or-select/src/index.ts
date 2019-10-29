@@ -47,10 +47,10 @@ export class OrSelect extends LitElement {
     public required?: boolean;
 
     @property({type: Boolean})
-    public autoSize?: boolean = true;
+    public noAutoSize?: boolean;
 
     @property({type: Boolean, attribute: true})
-    public showEmptyOption?: boolean = true;
+    public noEmpty?: boolean;
 
     @property({type: Array})
     public options!: string[] | [string, string][];
@@ -79,7 +79,7 @@ export class OrSelect extends LitElement {
             return;
         }
 
-        if (this.autoSize) {
+        if (!this.noAutoSize) {
             this._resize();
         }
         const previousValue = this.value;
@@ -93,34 +93,32 @@ export class OrSelect extends LitElement {
         if (_changedProperties.has("options") || _changedProperties.has("value")) {
             let val = this.value;
 
-            if (this.options.length === 1 || (!this.showEmptyOption && !val)) {
+            let index: number;
+            if (this.options.length === 1 || (this.noEmpty && !val)) {
                 const opt = this.options[0];
                 const firstValue = Array.isArray(opt) ? opt[0] : opt;
                 if (this.value !== firstValue) {
                     val = firstValue;
                 }
-            }
-
-            let index: number;
-            if (this.options.length === 1 || (!this.showEmptyOption && !val)) {
                 index = 0;
             } else {
                 index = this.options.findIndex((opt: string | [string, string]) => {
                     const value = Array.isArray(opt) ? opt[0] : opt;
-                    return value == val;
+                    return value === val;
                 });
 
-                if(this.showEmptyOption) {
+                if (!this.noEmpty) {
                     index = index + 1;
                 }
             }
 
-            const indexChanged = this._select.selectedIndex != index;
+            const indexChanged = this._select.selectedIndex !== index;
             this._select.selectedIndex = index;
-            if (indexChanged) {
+
+            if (val !== this.value) {
                 this.onChange();
             } else {
-                if (this.autoSize) {
+                if (!this.noAutoSize) {
                     this._resize();
                 }
             }
@@ -133,7 +131,7 @@ export class OrSelect extends LitElement {
         return html`
                <div class="mdc-select">
                       <select id="or-select" ?required="${this.required}" @change="${this.onChange}" ?disabled="${this.readonly || isSingular}">
-                        ${this.showEmptyOption && !isSingular ? html`<option value=""></option>` : ``}
+                        ${!this.noEmpty && !isSingular ? html`<option value=""></option>` : ``}
                         ${this.options.length > 0 && Array.isArray(this.options[0]) ?
                             (this.options as [string, string][]).map((option: [string, string]) => {
                                 return html`<option style="color: ${this._optColor || optionColorVar};" value="${option[0]}">${option[1]}</option>`;                            

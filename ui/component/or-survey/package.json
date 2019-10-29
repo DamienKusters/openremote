@@ -1,0 +1,26 @@
+{
+  "name": "@openremote/or-survey",
+  "version": "1.1.0",
+  "description": "Displays survey",
+  "main": "dist/umd/index.bundle.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"No tests\" && exit 0",
+    "prepublishOnly": "npx tsc -b && npx webpack"
+  },
+  "author": "OpenRemote",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "lit-element": "^2.2.1",
+    "@types/lodash-es": "^4.17.3",
+    "lodash-es": "^4.17.15",
+    "moment": "2.24.0"
+  },
+  "devDependencies": {
+    "tslint": ">=5.11.0",
+    "typescript": ">=3.4.5",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9"
+  }
+}

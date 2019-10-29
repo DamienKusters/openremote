@@ -20,14 +20,19 @@
 package org.openremote.manager.security;
 
 import org.apache.camel.ExchangePattern;
+import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.resource.*;
+import org.keycloak.common.VerificationException;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.*;
 import org.openremote.container.Container;
 import org.openremote.container.message.MessageBrokerService;
 import org.openremote.container.persistence.PersistenceEvent;
 import org.openremote.container.persistence.PersistenceService;
 import org.openremote.container.security.AuthContext;
+import org.openremote.container.security.AuthForm;
 import org.openremote.container.security.keycloak.KeycloakIdentityProvider;
+import org.openremote.container.security.keycloak.KeycloakResource;
 import org.openremote.container.timer.TimerService;
 import org.openremote.container.web.ClientRequestInfo;
 import org.openremote.container.web.WebService;
@@ -53,6 +58,8 @@ import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import static org.openremote.container.util.JsonUtil.convert;
+import static org.openremote.container.web.WebClient.getTarget;
+import static org.openremote.manager.setup.AbstractKeycloakSetup.*;
 import static org.openremote.model.Constants.*;
 
 public class ManagerKeycloakIdentityProvider extends KeycloakIdentityProvider implements ManagerIdentityProvider {
@@ -65,10 +72,12 @@ public class ManagerKeycloakIdentityProvider extends KeycloakIdentityProvider im
     final protected MessageBrokerService messageBrokerService;
     final protected ClientEventService clientEventService;
     final protected ConsoleAppService consoleAppService;
+    final protected String keycloakAdminPassword;
 
     public ManagerKeycloakIdentityProvider(UriBuilder externalServerUri, Container container) {
         super(KEYCLOAK_CLIENT_ID, externalServerUri, container);
 
+        this.keycloakAdminPassword = container.getConfig().getOrDefault(SETUP_ADMIN_PASSWORD, SETUP_ADMIN_PASSWORD_DEFAULT);
         this.devMode = container.isDevMode();
         this.timerService = container.getService(TimerService.class);
         this.persistenceService = container.getService(PersistenceService.class);
@@ -351,7 +360,8 @@ public class ManagerKeycloakIdentityProvider extends KeycloakIdentityProvider im
     @Override
     public void updateTenant(ClientRequestInfo clientRequestInfo, String realm, Tenant tenant) {
         LOG.fine("Update tenant: " + tenant);
-        getRealms(clientRequestInfo).realm(realm).update(
+
+        getRealms(new ClientRequestInfo(clientRequestInfo.getRemoteAddress(), getRealmAdminToken(realm, clientRequestInfo))).realm(realm).update(
             convert(Container.JSON, RealmRepresentation.class, tenant)
         );
         publishModification(PersistenceEvent.Cause.UPDATE, tenant);
@@ -367,7 +377,7 @@ public class ManagerKeycloakIdentityProvider extends KeycloakIdentityProvider im
         LOG.fine("Create tenant: " + tenant);
         RealmRepresentation realmRepresentation = convert(Container.JSON, RealmRepresentation.class, tenant);
         configureRealm(realmRepresentation, emailConfig);
-
+        clientRequestInfo = new ClientRequestInfo(clientRequestInfo.getRemoteAddress(), getRealmAdminToken(tenant.getRealm(), clientRequestInfo));
         // TODO This is not atomic, write compensation actions
         getRealms(clientRequestInfo).create(realmRepresentation);
         createClientApplication(clientRequestInfo, realmRepresentation.getRealm());
@@ -380,7 +390,7 @@ public class ManagerKeycloakIdentityProvider extends KeycloakIdentityProvider im
         Tenant tenant = getTenant(realm);
         if (tenant != null) {
             LOG.fine("Delete tenant: " + realm);
-            getRealms(clientRequestInfo).realm(realm).remove();
+            getRealms(new ClientRequestInfo(clientRequestInfo.getRemoteAddress(), getRealmAdminToken(realm, clientRequestInfo))).realm(realm).remove();
             publishModification(PersistenceEvent.Cause.DELETE, tenant);
         }
     }
@@ -480,6 +490,26 @@ public class ManagerKeycloakIdentityProvider extends KeycloakIdentityProvider im
         addDefaultRoles(clientResource.roles());
     }
 
+    /**
+     * Keycloak only allows realm CRUD using the {realm}-realm client or the admin-cli client so we need to ensure we
+     * have a token for one of these realms; if we are creating a realm then that means using the admin-cli
+     */
+    protected String getRealmAdminToken(String realm, ClientRequestInfo clientRequestInfo) {
+        try {
+            AccessToken token = TokenVerifier.create(clientRequestInfo.getAccessToken(), AccessToken.class).getToken();
+
+            if (!token.getIssuedFor().equals(ADMIN_CLI_CLIENT_ID)) {
+                return getKeycloak().getAccessToken(
+                    MASTER_REALM, new AuthForm(ADMIN_CLI_CLIENT_ID, MASTER_REALM_ADMIN_USER, keycloakAdminPassword)
+                ).getToken();
+            }
+            return clientRequestInfo.getAccessToken();
+        } catch (VerificationException e) {
+            LOG.log(Level.WARNING, "Failed to parse access token", e);
+            return clientRequestInfo.getAccessToken();
+        }
+    }
+
     protected ClientRepresentation createClientApplication(String realm, String clientId, String appName, boolean devMode) {
         ClientRepresentation client = new ClientRepresentation();
 
@@ -494,19 +524,20 @@ public class ManagerKeycloakIdentityProvider extends KeycloakIdentityProvider im
 
             // Allow any web origin (this will add CORS headers to token requests etc.)
             client.setWebOrigins(Collections.singletonList("*"));
-        }
-
-        List<String> redirectUris = new ArrayList<>();
-        try {
-            for (String consoleName : consoleAppService.getInstalled()) {
-                addClientRedirectUris(consoleName, redirectUris);
+            client.setRedirectUris(Collections.singletonList("*"));
+        } else {
+            List<String> redirectUris = new ArrayList<>();
+            try {
+                for (String consoleName : consoleAppService.getInstalled()) {
+                    addClientRedirectUris(consoleName, redirectUris);
+                }
+            } catch (Exception exception) {
+                LOG.log(Level.WARNING, exception.getMessage(), exception);
+                addClientRedirectUris(realm, redirectUris);
             }
-        } catch (Exception exception) {
-            LOG.log(Level.WARNING, exception.getMessage(), exception);
-            addClientRedirectUris(realm, redirectUris);
-        }
 
-        client.setRedirectUris(redirectUris);
+            client.setRedirectUris(redirectUris);
+        }
 
         return client;
     }

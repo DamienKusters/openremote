@@ -27,6 +27,7 @@ import org.openremote.model.event.shared.TenantFilter;
 import org.openremote.model.query.UserQuery;
 import org.openremote.model.security.*;
 
+import java.io.IOException;
 import java.util.List;
 
 /**

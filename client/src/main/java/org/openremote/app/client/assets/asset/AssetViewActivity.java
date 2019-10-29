@@ -42,9 +42,8 @@ import org.openremote.model.attribute.AttributeEvent;
 import org.openremote.model.attribute.AttributeExecuteStatus;
 import org.openremote.model.attribute.AttributeRef;
 import org.openremote.model.datapoint.AssetDatapointResource;
-import org.openremote.model.datapoint.Datapoint;
 import org.openremote.model.datapoint.DatapointInterval;
-import org.openremote.model.datapoint.NumberDatapoint;
+import org.openremote.model.datapoint.ValueDatapoint;
 import org.openremote.model.event.shared.TenantFilter;
 import org.openremote.model.interop.Consumer;
 import org.openremote.model.map.MapResource;
@@ -264,7 +263,9 @@ public class AssetViewActivity
     @Override
     public void writeAssetToView() {
         super.writeAssetToView();
-        view.setIconAndType(asset.getWellKnownType().getIcon(), asset.getType());
+        AssetType assetType = asset.getWellKnownType();
+
+        view.setIconAndType(assetType != null ? assetType.getIcon() : "cube", asset.getType());
 
         // Build the link manually, shorter result than AssetQueryMapper, and we must hardcode the path anyway
         String query = Values.createObject()
@@ -347,7 +348,7 @@ public class AssetViewActivity
     protected List<AbstractAttributeViewExtension> createAttributeExtensions(AssetAttribute attribute, AttributeViewImpl view) {
         List<AbstractAttributeViewExtension> viewExtensions = new ArrayList<>();
 
-        if (Datapoint.isDatapointsCapable(attribute) && attribute.isStoreDatapoints()) {
+        if (attribute.isStoreDatapoints()) {
             viewExtensions.add(
                 createDatapointBrowser(attribute, view)
             );
@@ -397,7 +398,7 @@ public class AssetViewActivity
             @Override
             protected void queryDatapoints(DatapointInterval interval,
                                            long timestamp,
-                                           Consumer<NumberDatapoint[]> consumer) {
+                                           Consumer<ValueDatapoint[]> consumer) {
                 attribute.getName().ifPresent(attributeName ->
                     queryDataPoints(attributeName, interval, timestamp, consumer)
                 );
@@ -405,11 +406,11 @@ public class AssetViewActivity
         };
     }
 
-    protected void queryDataPoints(String attributeName, DatapointInterval interval, long timestamp, Consumer<NumberDatapoint[]> consumer) {
+    protected void queryDataPoints(String attributeName, DatapointInterval interval, long timestamp, Consumer<ValueDatapoint[]> consumer) {
         if (!isNullOrEmpty(attributeName)) {
             environment.getApp().getRequests().sendAndReturn(
                 numberDatapointArrayMapper,
-                requestParams -> assetDatapointResource.getNumberDatapoints(
+                requestParams -> assetDatapointResource.getDatapoints(
                     requestParams, this.asset.getId(), attributeName, interval, timestamp
                 ),
                 200,

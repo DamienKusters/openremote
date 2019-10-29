@@ -1,0 +1,25 @@
+{
+  "name": "@openremote/or-panel",
+  "version": "1.1.0",
+  "description": "OpenRemote scrollable panel with custom scrollbars based on simplebar",
+  "main": "dist/umd/index.bundle.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"No tests\" && exit 0",
+    "prepublishOnly": "npx tsc -b && npx webpack"
+  },
+  "author": "OpenRemote",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "lit-element": "^2.2.1",
+    "simplebar": "^4.2.3"
+  },
+  "devDependencies": {
+    "@types/simplebar": "^2.4.2",
+    "tslint": ">=5.11.0",
+    "typescript": ">=3.4.5",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9"
+  }
+}

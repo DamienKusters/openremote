@@ -83,7 +83,7 @@ public class AssetsFacade<T extends Ruleset> extends Assets {
         AssetQuery.Select oldValue = assetQuery.select;
 
         if (assetQuery.select == null)
-            assetQuery.select = new AssetQuery.Select();
+            assetQuery.select = AssetQuery.Select.selectExcludePathAndAttributes();
 
         assetQuery.select = AssetQuery.Select.selectExcludeAll();
 

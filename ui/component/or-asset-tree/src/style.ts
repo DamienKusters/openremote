@@ -1,18 +1,18 @@
 import {css, unsafeCSS} from "lit-element";
-import {DefaultColor1, DefaultColor2, DefaultColor5, DefaultColor3, DefaultColor4, DefaultColor7, DefaultBoxShadow, DefaultDisabledOpacity,
-    DefaultBoxShadowBottom} from "@openremote/core";
-import mdi from "@openremote/or-icon/dist/mdi-icons";
+import {DefaultBoxShadow, DefaultColor1, DefaultColor2, DefaultColor4, DefaultColor5} from "@openremote/core";
+import {mdiChevronRight} from "@mdi/js";
+import {mdiChevronDown} from "@mdi/js";
 
 // language=CSS
 export const style = css`
 
     :host {       
         --internal-or-asset-tree-header-color: var(--or-asset-tree-header-color, var(--or-app-color4, ${unsafeCSS(DefaultColor4)}));     
-        --internal-or-asset-tree-header-text-color: var(--or-asset-tree-header-text-color, var(--or-app-color7, ${unsafeCSS(DefaultColor7)}));
+        --internal-or-asset-tree-header-text-color: var(--or-asset-tree-header-text-color, var(--or-app-color7, ${unsafeCSS(DefaultColor1)}));
         --internal-or-asset-tree-header-menu-background-color: var(--or-asset-tree-header-menu-background-color, var(--internal-or-asset-tree-header-text-color));
         --internal-or-asset-tree-header-menu-text-color: var(--or-asset-tree-header-menu-text-color, inherit);
         --internal-or-asset-tree-header-height: var(--or-asset-tree-header-height, 40px);
-        --internal-or-asset-tree-background-color: var(--or-asset-tree-background-color, var(--or-app-color7, ${unsafeCSS(DefaultColor7)}));
+        --internal-or-asset-tree-background-color: var(--or-asset-tree-background-color, var(--or-app-color1, ${unsafeCSS(DefaultColor1)}));
         --internal-or-asset-tree-text-color: var(--or-asset-tree-text-color, inherit);
         --internal-or-asset-tree-item-height: var(--or-asset-tree-item-height, 24px);
         --internal-or-asset-tree-item-padding: var(--or-asset-tree-item-padding, 10px);
@@ -248,15 +248,15 @@ export const style = css`
     }
     
     .expander[data-expandable] {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='rgb(204, 204, 204)' viewBox='0 0 24 24'%3E%3Cpath d='${unsafeCSS(mdi.icons["chevron-right"])}'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='rgb(204, 204, 204)' viewBox='0 0 24 24'%3E%3Cpath d='${unsafeCSS(mdiChevronRight)}'/%3E%3C/svg%3E");
     }
 
     .expander[data-expandable]:hover {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='${unsafeCSS(mdi.icons["chevron-right"])}'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='${unsafeCSS(mdiChevronRight)}'/%3E%3C/svg%3E");
     }
     
     li[data-expanded] > .node-container .expander {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='${unsafeCSS(mdi.icons["chevron-down"])}'/%3E%3C/svg%3E") !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='${unsafeCSS(mdiChevronDown)}'/%3E%3C/svg%3E") !important;
     }
     
     .node-name {

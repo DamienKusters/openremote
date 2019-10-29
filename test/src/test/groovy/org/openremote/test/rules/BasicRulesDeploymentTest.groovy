@@ -11,7 +11,6 @@ import org.openremote.manager.setup.builtin.KeycloakDemoSetup
 import org.openremote.manager.setup.builtin.ManagerDemoSetup
 import org.openremote.model.rules.AssetRuleset
 import org.openremote.model.rules.GlobalRuleset
-import org.openremote.model.rules.RulesetStatus
 import org.openremote.model.rules.TenantRuleset
 import org.openremote.test.ManagerContainerTrait
 import spock.lang.Specification

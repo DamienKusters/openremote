@@ -6,8 +6,21 @@ import {AxiosRequestConfig} from "axios";
 import {EventProvider, EventProviderFactory, EventProviderStatus, WebSocketEventProvider} from "./event";
 import i18next from "i18next";
 import i18nextXhr from "i18next-xhr-backend";
-import {AssetDescriptor, AttributeDescriptor, AttributeValueDescriptor, MetaItemDescriptor} from "@openremote/model";
+import {
+    AssetDescriptor,
+    Attribute,
+    AttributeDescriptor,
+    AttributeValueDescriptor,
+    MetaItemDescriptor
+} from "@openremote/model";
 import * as Util from "./util";
+
+// Re-exports
+export {Util};
+export * from "./asset-mixin";
+export * from "./console";
+export * from "./event";
+export * from "./defaults";
 
 export declare type KeycloakPromise<T> = {
     success<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | KeycloakPromise<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | KeycloakPromise<TResult2>) | undefined | null): KeycloakPromise<TResult1 | TResult2>;
@@ -29,20 +42,6 @@ export declare type Keycloak = {
     updateToken(expiry: number): KeycloakPromise<boolean>;
     clearToken(): void;
 }
-
-export {Util};
-
-export const DefaultColor1: string = "#FFF"; // Header
-export const DefaultColor2: string = "#F9F9F9"; // Background
-export const DefaultColor3: string = "#4c4c4c"; // Text
-export const DefaultColor4: string = "#1B5630"; // Buttons
-export const DefaultColor5: string = "#CCC"; // Borders and lines
-export const DefaultColor6: string = "#be0000"; // Invalid/Error
-export const DefaultColor7: string = "#FFF"; // Panels
-export const DefaultBoxShadowBottom: string = "0 5px 5px -5px rgba(0,0,0,0.3)";
-export const DefaultBoxShadow: string = "0 1px 3px 0 rgba(0,0,0,0.21)";
-export const DefaultHeaderHeight: string = "50px";
-export const DefaultDisabledOpacity: string = "0.3";
 
 export enum ORError {
     NONE = "NONE",
@@ -156,7 +155,7 @@ export class AssetModelUtil {
         });
     }
 
-    public static getAttributeDescriptorFromAsset(assetType?: string, attributeName?: string): AttributeDescriptor | undefined {
+    public static getAttributeDescriptorFromAsset(attributeName: string, assetType?: string): AttributeDescriptor | undefined {
         if (!attributeName) {
             return;
         }
@@ -174,14 +173,25 @@ export class AssetModelUtil {
         return this.getAttributeDescriptor(attributeName);
     }
 
-    public static getAttributeValueDescriptor(name?: string): AttributeValueDescriptor | undefined {
+    public static getAttributeValueDescriptor(name: string): AttributeValueDescriptor | undefined {
+        return this._attributeValueDescriptors.find((attributeValueDescriptor) => {
+            return attributeValueDescriptor.name === name;
+        });
+    }
+
+    public static getAttributeValueDescriptorFromAsset(name: string | undefined, assetType?: string, attributeName?: string): AttributeValueDescriptor | undefined {
         if (!name) {
             return;
         }
 
-        return this._attributeValueDescriptors.find((attributeValueDescriptor) => {
-            return attributeValueDescriptor.name === name;
-        });
+        if (attributeName) {
+            const attributeDescriptor = this.getAttributeDescriptorFromAsset(attributeName, assetType);
+            if (attributeDescriptor) {
+                return attributeDescriptor.valueDescriptor;
+            }
+        }
+
+        return this.getAttributeValueDescriptor(name);
     }
 
     public static getMetaItemDescriptor(urn?: string): MetaItemDescriptor | undefined {
@@ -202,6 +212,20 @@ export class AssetModelUtil {
             return false;
         }
         return attributeValueDescriptor1.name === attributeValueDescriptor2.name && attributeValueDescriptor1.valueType === attributeValueDescriptor2.valueType;
+    }
+
+    public static getMetaValue(metaItemUrn: string | MetaItemDescriptor, attribute: Attribute | undefined, descriptor: AttributeDescriptor | undefined): any {
+        const urn = typeof metaItemUrn === "string" ? metaItemUrn : (metaItemUrn as MetaItemDescriptor).urn;
+
+        if (attribute && attribute.meta) {
+            const metaItem = attribute.meta.find((mi) => mi.name === urn);
+            return metaItem ? metaItem.value : undefined;
+        }
+
+        if (descriptor && descriptor.metaItemDescriptors) {
+            const metaItemDescriptor = descriptor.metaItemDescriptors.find((mid) => mid.urn === urn);
+            return metaItemDescriptor ? metaItemDescriptor.initialValue : undefined;
+        }
     }
 
     public static getMetaInitialValueFromMetaDescriptors(metaItemUrn: MetaItemDescriptor | string, metaItemDescriptors: MetaItemDescriptor[] | undefined): any | undefined {
@@ -291,6 +315,10 @@ export class Manager implements EventProviderFactory {
 
     get events() {
         return this._events;
+    }
+
+    get rest() {
+        return rest;
     }
 
     get language() {
@@ -460,10 +488,11 @@ export class Manager implements EventProviderFactory {
             });
             this._managerVersion = json && json.version ? json.version : "";
 
-            // Async load material design icons if requested
+            // Load material design icons if requested
             if (this._config.loadIcons) {
-                const mdiIconSet = await import(/* webpackChunkName: "mdi-icons" */ "@openremote/or-icon/dist/mdi-icons");
-                IconSets.addIconSet("mdi", mdiIconSet.default);
+                const response = await fetch(manager.config.managerUrl + "/shared/mdi-icons.json");
+                const iconSet = await response.json();
+                IconSets.addIconSet("mdi", iconSet);
             }
 
             return true;
@@ -893,4 +922,8 @@ export class Manager implements EventProviderFactory {
     }
 }
 
-export default new Manager();
+const manager = new Manager();
+
+export {manager};
+
+export default manager;

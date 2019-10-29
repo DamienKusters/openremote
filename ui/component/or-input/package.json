@@ -1,22 +1,35 @@
 {
   "name": "@openremote/or-input",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "OpenRemote input",
-  "main": "dist/index.js",
-  "types": "src/index.ts",
+  "main": "dist/umd/index.bundle.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
   "scripts": {
-    "build": "npx tsc",
-    "test": "echo \"No tests\" && exit 0"
+    "build": "npx tsc -b",
+    "test": "echo \"No tests\" && exit 0",
+    "prepublishOnly": "npx tsc -b && npx webpack"
   },
   "author": "OpenRemote",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@openremote/core": "^1.0.0",
-    "@openremote/or-select": "^1.0.0",
-    "lit-element": "^2.1.0"
+    "@material/button": "^3.2.0",
+    "@material/checkbox": "^3.2.0",
+    "@material/floating-label": "^3.2.0",
+    "@material/form-field": "^3.2.0",
+    "@material/icon-button": "^3.2.0",
+    "@material/line-ripple": "^3.1.0",
+    "@material/ripple": "^3.2.0",
+    "@material/select": "^3.2.0",
+    "@material/switch": "^3.2.0",
+    "@material/textfield": "^3.2.0",
+    "lit-element": "^2.2.1"
   },
   "devDependencies": {
-    "tslint": "^5.11.0",
-    "typescript": "^3.4.5"
+    "tslint": ">=5.11.0",
+    "typescript": ">=3.4.5",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9"
   }
 }
