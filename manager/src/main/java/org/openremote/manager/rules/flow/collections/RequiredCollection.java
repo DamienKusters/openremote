@@ -31,7 +31,7 @@ public class RequiredCollection implements NodePairCollection {
                     AssetAttributeInternalValue assetAttributePair = Container.JSON.convertValue(info.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
                     String assetId = assetAttributePair.getAssetId();
                     String attributeName = assetAttributePair.getAttributeName();
-                    Optional<AssetState> readValue = info.getFacts().matchFirstAssetState(new AssetQuery().select(AssetQuery.Select.selectAll()).ids(assetId).attributeName(attributeName));
+                    Optional<AssetState> readValue = info.getFacts().matchFirstAssetState(new AssetQuery().ids(assetId).attributeName(attributeName));
                     if (!readValue.isPresent()) return null;
                     return readValue.get().getValue().orElse(null);
                 }
@@ -51,8 +51,8 @@ public class RequiredCollection implements NodePairCollection {
                         return;
                     }
                     AssetAttributeInternalValue assetAttributePair = Container.JSON.convertValue(info.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
-                    Optional<AssetState> existingValue = info.getFacts().matchFirstAssetState(new AssetQuery().select(AssetQuery.Select.selectAll()).ids(assetAttributePair.getAssetId()).attributeName(assetAttributePair.getAttributeName()));
-                    
+                    Optional<AssetState> existingValue = info.getFacts().matchFirstAssetState(new AssetQuery().ids(assetAttributePair.getAssetId()).attributeName(assetAttributePair.getAttributeName()));
+
                     if (existingValue.isPresent())
                         if (existingValue.get().getValue().isPresent())
                             if (existingValue.get().getValue().get().equals(value)) return;

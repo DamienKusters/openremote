@@ -75,8 +75,7 @@ public class FlowRulesBuilder extends JsonRulesBuilder {
                 AssetAttributeInternalValue internal = Container.JSON.convertValue(c.getInternals()[0].getValue(), AssetAttributeInternalValue.class);
                 String assetId = internal.getAssetId();
                 String attributeName = internal.getAttributeName();
-                List<AssetState> allAssets = facts.matchAssetState(new AssetQuery().
-                        select(AssetQuery.Select.selectAll()).ids(assetId).attributeName(attributeName)
+                List<AssetState> allAssets = facts.matchAssetState(new AssetQuery().ids(assetId).attributeName(attributeName)
                 ).collect(Collectors.toList());
 
                 return allAssets.stream().anyMatch(state -> {
@@ -131,7 +130,7 @@ public class FlowRulesBuilder extends JsonRulesBuilder {
             assetIds.add(assetId);
         });
 
-        return new AssetQuery().select(AssetQuery.Select.selectAll()).ids(assetIds.toArray(new String[0]));
+        return new AssetQuery().ids(assetIds.toArray(new String[0]));
     }
 
     private List<Node> backtrackFrom(NodeCollection collection, Node node) {
