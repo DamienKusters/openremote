@@ -6,6 +6,7 @@ public enum PickerType {
     NUMBER,
     DROPDOWN,
     DOUBLE_DROPDOWN,
+    CHECKBOX,
     ASSET_ATTRIBUTE,
     COLOR
 }

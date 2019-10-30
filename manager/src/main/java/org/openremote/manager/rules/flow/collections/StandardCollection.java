@@ -22,10 +22,7 @@ public class StandardCollection implements NodePairCollection {
 
         nodePairs.add(new NodePair(
                 new Node(NodeType.INPUT, "Boolean", new NodeInternal[]{
-                        new NodeInternal("Value", new Picker("Boolean", PickerType.DROPDOWN, new Option[]{
-                                new Option("True", true),
-                                new Option("False", false)
-                        }))
+                        new NodeInternal("Value", new Picker(PickerType.CHECKBOX))
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.BOOLEAN)
                 }),
@@ -39,7 +36,7 @@ public class StandardCollection implements NodePairCollection {
 
         nodePairs.add(new NodePair(
                 new Node(NodeType.INPUT, "Number", new NodeInternal[]{
-                        new NodeInternal("Value", new Picker("Number", PickerType.NUMBER))
+                        new NodeInternal("Value", new Picker(PickerType.NUMBER))
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.NUMBER)
                 }),
@@ -55,7 +52,7 @@ public class StandardCollection implements NodePairCollection {
 
         nodePairs.add(new NodePair(
                 new Node(NodeType.INPUT, "Text", new NodeInternal[]{
-                        new NodeInternal("Value", new Picker("Text", PickerType.MULTILINE))
+                        new NodeInternal("Value", new Picker(PickerType.MULTILINE))
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.STRING)
                 }),
@@ -105,7 +102,7 @@ public class StandardCollection implements NodePairCollection {
 
         nodePairs.add(new NodePair(
                 new Node(NodeType.PROCESSOR, "Combine text", new NodeInternal[]{
-                        new NodeInternal("joiner", new Picker("joiner", PickerType.TEXT))
+                        new NodeInternal("Joiner", new Picker(PickerType.TEXT))
                 }, new NodeSocket[]{
                         new NodeSocket("a", NodeDataType.STRING),
                         new NodeSocket("b", NodeDataType.STRING),
@@ -333,7 +330,7 @@ public class StandardCollection implements NodePairCollection {
 
         nodePairs.add(new NodePair(
                 new Node(NodeType.OUTPUT, "Log", new NodeInternal[]{
-                        new NodeInternal("Level", new Picker("Log level", PickerType.DROPDOWN, new Option[]{
+                        new NodeInternal("Level", new Picker(PickerType.DROPDOWN, new Option[]{
                                 new Option("Info", 0),
                                 new Option("Warning", 1),
                                 new Option("Severe", 2),

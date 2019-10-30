@@ -23,7 +23,7 @@ public class RequiredCollection implements NodePairCollection {
 
         nodePairs.add(new NodePair(
                 new Node(NodeType.INPUT, "Read attribute", new NodeInternal[]{
-                        new NodeInternal("Attribute", new Picker("Asset Attribute", PickerType.ASSET_ATTRIBUTE))
+                        new NodeInternal("Attribute", new Picker(PickerType.ASSET_ATTRIBUTE))
                 }, new NodeSocket[0], new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.ANY)
                 }),
@@ -39,7 +39,7 @@ public class RequiredCollection implements NodePairCollection {
 
         nodePairs.add(new NodePair(
                 new Node(NodeType.OUTPUT, "Write attribute", new NodeInternal[]{
-                        new NodeInternal("Attribute", new Picker("Asset Attribute", PickerType.ASSET_ATTRIBUTE))
+                        new NodeInternal("Attribute", new Picker(PickerType.ASSET_ATTRIBUTE))
                 }, new NodeSocket[]{
                         new NodeSocket("value", NodeDataType.ANY)
                 }, new NodeSocket[0]),
